@@ -1,5 +1,6 @@
-package com.microservice.student_service.model;
+package com.microservice.student_service.entity;
 
+import com.microservice.student_service.dto.request.StudentCreationRequest;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,22 +22,31 @@ public class Student {
     private String id;
 
     @Column(name = "student_code", nullable = false, unique = true)
-    @NotBlank(message = "Student code is required")
+    @NotBlank(message = "STUDENT_CODE_REQUIRED")
     private String studentCode;
 
     @Column(name = "first_name", nullable = false)
-    @NotBlank(message = "First name is required")
+    @NotBlank(message = "FIRST_NAME_REQUIRED")
     private String firstName;
 
     @Column(name = "last_name", nullable = false)
-    @NotBlank(message = "Last name is required")
+    @NotBlank(message = "LAST_NAME_REQUIRED")
     private String lastName;
 
-    @Email(message = "Email should be valid")
+    @Email(message = "EMAIL_NOT_VALID")
     @Column(unique = true)
     private String email;
 
     @Column(name = "class_name")
     private String className;
 
+    public static Student fromStudentCreationRequest(StudentCreationRequest request) {
+        return Student.builder()
+                .studentCode(request.getStudentCode())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .email(request.getEmail())
+                .className(request.getClassName())
+                .build();
+    }
 }

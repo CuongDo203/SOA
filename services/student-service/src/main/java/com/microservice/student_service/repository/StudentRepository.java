@@ -1,14 +1,16 @@
 package com.microservice.student_service.repository;
 
-import com.microservice.student_service.model.Student;
+import com.microservice.student_service.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+@Repository
 public interface StudentRepository extends JpaRepository<Student, String> {
 
     Optional<Student> findByStudentCode(String studentCode);
