@@ -12,7 +12,8 @@ public enum ErrorCode {
         FIRST_NAME_REQUIRED(1005, "First name is required", HttpStatus.BAD_REQUEST),
         LAST_NAME_REQUIRED(1006, "Last name is required", HttpStatus.BAD_REQUEST),
         EMAIL_NOT_VALID(1007, "Email should be valid", HttpStatus.BAD_REQUEST),
-        STUDENT_NOT_FOUND(1008, "Student not found", HttpStatus.NOT_FOUND)
+        STUDENT_NOT_FOUND(1008, "Student not found", HttpStatus.NOT_FOUND),
+        SET_STUDENT_CODE_EMPTY(1009, "Set of student codes cannot be empty", HttpStatus.BAD_REQUEST)
     ;
 
     private int code;

@@ -1,7 +1,9 @@
 package com.microservice.student_service.controller;
 
+import com.microservice.student_service.dto.request.StudentCheckRequest;
 import com.microservice.student_service.dto.request.StudentCreationRequest;
 import com.microservice.student_service.dto.response.ApiResponse;
+import com.microservice.student_service.dto.response.StudentCheckResponse;
 import com.microservice.student_service.dto.response.StudentResponse;
 import com.microservice.student_service.entity.Student;
 import com.microservice.student_service.service.StudentService;
@@ -70,6 +72,15 @@ public class StudentController {
         return ApiResponse.<List<StudentResponse>>builder()
                 .message("Get all student successfully!")
                 .result(studentResponses)
+                .build();
+    }
+
+    @PostMapping("/check-existence")
+    public ApiResponse<StudentCheckResponse> checkStudentExistence(@Valid @RequestBody StudentCheckRequest request) {
+        StudentCheckResponse studentCheckResponse = studentService.checkStudentExistence(request.getStudentCodes());
+        return ApiResponse.<StudentCheckResponse>builder()
+                .message("Student existence check completed!")
+                .result(studentCheckResponse)
                 .build();
     }
 }
