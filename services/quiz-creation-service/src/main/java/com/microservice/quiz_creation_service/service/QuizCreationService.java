@@ -8,6 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface QuizCreationService {
     CreateProcessResponse startQuizCreationProcess();
-    ProcessStepResponse importQuestions(String processId, MultipartFile file);
+//    ProcessStepResponse importQuestions(String processId, MultipartFile file);
     CreateQuizResponse createQuiz(CreateQuizRequest createQuizRequest);
 }

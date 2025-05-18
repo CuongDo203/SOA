@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuizConfigDTO {
+    private String id;
     private Integer durationMinutes; // Thời gian làm bài (phút)
     private Integer questionCount;   // Số lượng câu hỏi
     private Double maxScore;         // Điểm tối đa

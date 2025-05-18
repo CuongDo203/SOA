@@ -2,8 +2,10 @@ package com.microservice.quiz_creation_service.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.quiz_creation_service.clients.ImportServiceClient;
+import com.microservice.quiz_creation_service.clients.QuestionServiceClient;
 import com.microservice.quiz_creation_service.clients.QuizConfigServiceClient;
 import com.microservice.quiz_creation_service.clients.StudentServiceClient;
+import com.microservice.quiz_creation_service.dto.request.CreateQuestionRequest;
 import com.microservice.quiz_creation_service.dto.request.CreateQuizRequest;
 import com.microservice.quiz_creation_service.dto.request.QuizConfigDTO;
 import com.microservice.quiz_creation_service.dto.request.StudentCreationRequest;
@@ -34,6 +36,8 @@ public class QuizCreationServiceImpl implements QuizCreationService{
     ImportServiceClient importServiceClient;
     StudentServiceClient studentServiceClient;
     QuizConfigServiceClient quizConfigServiceClient;
+    QuestionServiceClient questionServiceClient;
+
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @Transactional
@@ -42,12 +46,6 @@ public class QuizCreationServiceImpl implements QuizCreationService{
         process.setStatus(QuizCreationProcess.Status.PENDING_QUESTIONS);
         QuizCreationProcess savedProcess = processRepository.save(process);
         log.info("QuizCreationService: Start with id: {}", savedProcess.getProcessId());
-//        SendQuizCodeEvent event = SendQuizCodeEvent.builder()
-//                .recipient("cdo85745@gmail.com")
-//                .body("Test email body")
-//                .subject("Test email subject")
-//                .build();
-//        kafkaTemplate.send("test-email", event);
         CreateProcessResponse response = CreateProcessResponse.builder()
                 .processId(savedProcess.getProcessId())
                 .status(savedProcess.getStatus().name())
@@ -56,142 +54,9 @@ public class QuizCreationServiceImpl implements QuizCreationService{
         return response;
     }
 
-    @Transactional
-    public ProcessStepResponse importQuestions(String processId, MultipartFile questionFile) {
-//        QuizCreationProcess process = processRepository.findById(processId).orElseThrow(
-//                () -> new ResourceNotFoundException(ErrorCode.RESOURCE_NOT_FOUND_EXCEPTION));
-//
-//        if(process.getStatus() != QuizCreationProcess.Status.NOT_STARTED &&
-//            process.getStatus() != QuizCreationProcess.Status.PENDING_QUESTIONS) {
-//            throw new InvalidProcessStateException(ErrorCode.INVALID_PROCESS_STATE_EXCEPTION);
-//        }
-//        process.setStatus(QuizCreationProcess.Status.PENDING_QUESTIONS);
-//        //Gọi import service để parse câu hỏi
-//        List<QuestionParsedResponse> questions;
-//        try {
-//            questions = importServiceClient.importQuestions(questionFile);
-//            // Kiểm tra kết quả từ Import Service nếu cần (ví dụ: list rỗng có hợp lệ không)
-//            if (questions == null || questions.isEmpty()) {
-//                throw new RuntimeException("Import service returned no questions or null list.");
-//            }
-//        } catch (FeignException e) {
-//            // Lỗi từ Import Service (bao gồm cả lỗi parse/format)
-//            String errorMessage = "Import Service failed during question parsing: " + e.getMessage();
-//            // Cập nhật trạng thái FAILED và chi tiết lỗi vào bản ghi quy trình
-//            process.setStatus(QuizCreationProcess.Status.FAILED);
-//            process.setErrorDetails(errorMessage);
-//            processRepository.save(process); // Lưu trạng thái FAILED
-////            statusEmitterService.emitStatusUpdate(process); // Phát tín hiệu cập nhật trạng thái
-//
-//            // Trả về phản hồi lỗi cho bước này
-//            ProcessStepResponse response = ProcessStepResponse.builder()
-//                    .processId(processId)
-//                    .status("FAILED")
-//                    .message("Import questions failed.")
-//                    .errors(List.of(errorMessage))
-//                    .build();
-//            return response;
-//        }
-//        catch (IOException e) {
-//            // Lỗi đọc byte[]
-//            String errorMessage = "Failed to read question file bytes: " + e.getMessage();
-//            process.setStatus(QuizCreationProcess.Status.FAILED);
-//            process.setErrorDetails(errorMessage);
-//            processRepository.save(process);
-////            statusEmitterService.emitStatusUpdate(process);
-//            ProcessStepResponse response = ProcessStepResponse.builder()
-//                    .processId(processId)
-//                    .status("FAILED")
-//                    .message("Failed to read question file.")
-//                    .errors(List.of(errorMessage))
-//                    .build();
-//            return response;
-//        }
-//        catch (Exception e) { // Bắt các lỗi khác từ Import Service hoặc trong quá trình chuẩn bị
-//            String errorMessage = "Unexpected error during question import: " + e.getMessage();
-//            process.setStatus(QuizCreationProcess.Status.FAILED);
-//            process.setErrorDetails(errorMessage);
-//            processRepository.save(process);
-//            statusEmitterService.emitStatusUpdate(process);
-//            return new ProcessStepResponse(processId, "FAILED", "An unexpected error occurred during question import.", List.of(errorMessage));
-//        }
-
-        //Gọi validation service
-//        ValidationResult validationResult;
-//        try {
-//            validationResult = validationServiceClient.validateQuestions(questions);
-//            // Kiểm tra kết quả từ Validation Service
-//            if (validationResult == null) {
-//                throw new RuntimeException("Validation service returned null result for questions.");
-//            }
-//        } catch (FeignException e) {
-//            // Lỗi từ Validation Service
-//            String errorMessage = "Validation Service failed during question validation: " + getErrorMessageFromFeignException(e);
-//            process.setStatus(QuizCreationProcess.Status.FAILED);
-//            process.setErrorDetails(errorMessage);
-//            processRepository.save(process); // Lưu trạng thái FAILED
-//            statusEmitterService.emitStatusUpdate(process); // Phát tín hiệu cập nhật trạng thái
-//
-//            return new ProcessStepResponse(processId, "FAILED", "Validate questions failed.", List.of(errorMessage));
-//        } catch (Exception e) { // Bắt các lỗi khác
-//            String errorMessage = "Unexpected error during question validation: " + e.getMessage();
-//            process.setStatus(QuizCreationProcess.Status.FAILED);
-//            process.setErrorDetails(errorMessage);
-//            processRepository.save(process);
-//            statusEmitterService.emitStatusUpdate(process);
-//            return new ProcessStepResponse(processId, "FAILED", "An unexpected error occurred during question validation.", List.of(errorMessage));
-//        }
-        // Kiểm tra kết quả xác thực
-//        if (!validationResult.isValid()) {
-//            // Xác thực lỗi
-//            String errorMessages = String.join("; ", validationResult.getErrors());
-//            String userMessage = "Question validation failed.";
-//            System.err.println("Question validation failed for process " + processId + ": " + errorMessages);
-//
-//            process.setStatus(QuizCreationProcess.Status.FAILED);
-//            process.setErrorDetails(userMessage + " " + errorMessages);
-//            processRepository.save(process); // Lưu trạng thái FAILED
-//            statusEmitterService.emitStatusUpdate(process); // Phát tín hiệu cập nhật trạng thái
-//
-//            // Gửi thông báo lỗi chi tiết qua Kafka (cho giáo viên)
-//            publishErrorNotification(process.getTeacherEmail(), "Quiz Creation Failed (Questions)", process.getErrorDetails()); // teacherEmail từ process entity
-//
-//            // Trả về phản hồi lỗi cho bước này
-//            return new ProcessStepResponse(processId, "FAILED", userMessage, validationResult.getErrors());
-//
-//        } else {
-//            // Xác thực thành công
-//            System.out.println("Questions validated successfully for process " + processId + ". Proceed to import config.");
-//
-//            process.setStatus(QuizCreationProcess.Status.QUESTIONS_VALIDATED);
-//            // Lưu dữ liệu câu hỏi đã validate vào process (chuyển DTO -> JSON String)
-//            try {
-//                process.setValidatedQuestionsDataJson(objectMapper.writeValueAsString(questions));
-//            } catch (IOException e) {
-//                String errorMessage = "Failed to serialize validated questions data: " + e.getMessage();
-//                System.err.println(errorMessage);
-//                process.setStatus(QuizCreationProcess.Status.FAILED);
-//                process.setErrorDetails(errorMessage);
-//                processRepository.save(process);
-//                statusEmitterService.emitStatusUpdate(process);
-//                // Log lỗi này và trả về lỗi FAILED cho bước này dù validate thành công
-//                publishErrorNotification(process.getTeacherEmail(), "Quiz Creation Failed (Internal Error)", errorMessage);
-//                return new ProcessStepResponse(processId, "FAILED", "Internal error saving validated data.", List.of(errorMessage));
-//            }
-//
-//
-//            processRepository.save(process); // Lưu trạng thái QUESTIONS_VALIDATED và dữ liệu câu hỏi
-//            statusEmitterService.emitStatusUpdate(process); // Phát tín hiệu cập nhật trạng thái
-//
-//            // Trả về phản hồi thành công cho bước này
-//            return new ProcessStepResponse(processId, "SUCCESS", "Questions validated successfully. Please import quiz configuration.", null);
-//        }
-        return null;
-    }
-
     public CreateQuizResponse createQuiz(CreateQuizRequest createQuizRequest) {
         List<StudentCreationRequest> students = createQuizRequest.getStudents();
-//        log.info("students size: "+ students.size());
+        CreateQuizResponse response = new CreateQuizResponse();
         if(students == null || students.isEmpty()) {
             return null;
         }
@@ -199,19 +64,34 @@ public class QuizCreationServiceImpl implements QuizCreationService{
         if(quizConfig == null) {
             return null;
         }
+        List<CreateQuestionRequest> questionRequests = createQuizRequest.getQuestions();
+        if(questionRequests == null || questionRequests.isEmpty()) {
+            return null;
+        }
         List<String> savedStudentIds = new ArrayList<>();
-//        for(StudentCreationRequest student : students) {
-//            ApiResponse<StudentResponse> studentResponse = studentServiceClient.createStudent(student);
-//            log.info("Student created: {}", studentResponse);
-//            StudentResponse studentData = studentResponse.getResult();
-//            savedStudentIds.add(studentData.getId());
-//        }
+        for(StudentCreationRequest student : students) {
+            ApiResponse<StudentResponse> studentResponse = studentServiceClient.createStudent(student);
+            log.info("Student created: {}", studentResponse);
+            StudentResponse studentData = studentResponse.getResult();
+            savedStudentIds.add(studentData.getId());
+        }
+        response.setStudentIds(savedStudentIds);
         String quizCode = "QZ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        log.info("Quiz code: {}", quizCode);
         QuizConfigDTO quizConfigDTO = createQuizRequest.getQuizConfig();
         QuizConfigDTO savedQuizConfig = quizConfigServiceClient.createQuizConfig(quizConfigDTO);
         if(savedQuizConfig != null) {
             log.info("Quiz config created: {}", savedQuizConfig);
+            response.setQuizConfigId(savedQuizConfig.getId());
         }
-        return null;
+        List<String> savedQuestionIds = new ArrayList<>();
+        for(CreateQuestionRequest questionRequest : questionRequests) {
+            ApiResponse<QuestionResponse> questionResponse = questionServiceClient.createQuestion(questionRequest);
+            log.info("Question created: {}", questionResponse);
+            QuestionResponse questionData = questionResponse.getResult();
+            savedQuestionIds.add(questionData.getId());
+        }
+        response.setQuestionIds(savedQuestionIds);
+        return response;
     }
 }

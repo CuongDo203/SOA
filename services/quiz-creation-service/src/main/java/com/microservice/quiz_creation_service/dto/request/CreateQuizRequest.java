@@ -15,5 +15,5 @@ public class CreateQuizRequest {
     private String quizTitle;
     private List<StudentCreationRequest> students;
     private QuizConfigDTO quizConfig;
-
+    private List<CreateQuestionRequest> questions;
 }
