@@ -1,0 +1,2 @@
+CREATE DATABASE IF NOT EXISTS student_db;
+CREATE DATABASE IF NOT EXISTS quiz_creation_processes_db;

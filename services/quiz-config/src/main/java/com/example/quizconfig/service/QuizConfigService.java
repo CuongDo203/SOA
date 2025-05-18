@@ -22,6 +22,8 @@ public class QuizConfigService {
                 .finishTime(dto.getFinishTime())
                 .maxScore(dto.getMaxScore())
                 .rules(dto.getRules())
+                .start(dto.getStart())
+                .end(dto.getEnd())
                 .build();
         config = repository.save(config);
         dto.setId(config.getId());

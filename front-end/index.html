@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo bài thi trắc nghiệm</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chalkboard-teacher me-2"></i>
+                Hệ thống tạo bài thi trắc nghiệm
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-user me-1"></i> Giáo viên
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="quiz-creator-container">
+        <div class="row">
+            <div class="col-lg-9">
+                <!-- Step 1: Import Questions -->
+                <div class="step-container" id="step1">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <h2 class="step-title">Import danh sách câu hỏi</h2>
+                    </div>
+                    <p class="text-muted">Tải lên danh sách câu hỏi của bạn dưới dạng tệp Excel (.xlsx)</p>
+                    
+                    <div class="file-upload" id="questionUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <h4>Kéo & Thả tệp hoặc Nhấp để chọn</h4>
+                        <p class="text-muted">Hỗ trợ định dạng: XLSX, XLS</p>
+                        <input type="file" id="questionFile" accept=".xlsx, .xls" />
+                    </div>
+                    
+                    <div class="preview-panel hidden" id="questionPreviewPanel">
+                        <h5 class="mb-3">Xem trước danh sách câu hỏi</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Câu hỏi</th>
+                                        <th scope="col">Lựa chọn A</th>
+                                        <th scope="col">Lựa chọn B</th>
+                                        <th scope="col">Lựa chọn C</th>
+                                        <th scope="col">Lựa chọn D</th>
+                                        <th scope="col">Đáp án đúng</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="questionPreviewBody">
+                                    <!-- Preview content will be filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-secondary" id="downloadSampleQuestions">
+                                <i class="fas fa-download me-2"></i>Tải xuống mẫu
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-primary" id="nextToStep2">
+                                Tiếp theo <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Quiz Configuration -->
+                <div class="step-container hidden" id="step2">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <h2 class="step-title">Cấu hình bài thi</h2>
+                    </div>
+                    <p class="text-muted">Thiết lập cấu hình cho bài thi trắc nghiệm của bạn.</p>
+                    
+                    <form id="configForm">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="quizTitle" class="form-label">Tiêu đề bài thi <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="quizTitle" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="subjectName" class="form-label">Môn học <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="subjectName" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="durationMinutes" class="form-label">Thời gian làm bài (phút) <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="durationMinutes" min="5" max="180" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="passingScore" class="form-label">Điểm đạt <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="passingScore" min="1" max="10" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="questionCount" class="form-label">Số lượng câu hỏi <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="questionCount" min="5" max="100" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" id="startDate" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                    <input type="datetime-local" class="form-control" id="endDate" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label d-block">Tùy chọn bổ sung</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="shuffleQuestions">
+                                <label class="form-check-label" for="shuffleQuestions">Xáo trộn câu hỏi</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="shuffleOptions">
+                                <label class="form-check-label" for="shuffleOptions">Xáo trộn lựa chọn</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="showResults">
+                                <label class="form-check-label" for="showResults">Hiển thị kết quả ngay</label>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div class="row mt-4">
+                        <div class="col-6">
+                            <button class="btn btn-outline-secondary" id="backToStep1">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </button>
+                        </div>
+                        <div class="col-6 text-end">
+                            <button class="btn btn-primary" id="nextToStep3">
+                                Tiếp theo <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Import Students -->
+                <div class="step-container hidden" id="step3">
+                    <div class="step-header">
+                        <div class="step-number">3</div>
+                        <h2 class="step-title">Import danh sách sinh viên</h2>
+                    </div>
+                    <p class="text-muted">Tải lên danh sách sinh viên tham gia bài thi dưới dạng tệp Excel (.xlsx), CSV hoặc văn bản có định dạng.</p>
+                    
+                    <div class="file-upload" id="studentUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <h4>Kéo & Thả tệp hoặc Nhấp để chọn</h4>
+                        <p class="text-muted">Hỗ trợ định dạng: XLSX, CSV, TXT</p>
+                        <input type="file" id="studentFile" accept=".xlsx,.csv,.txt" />
+                    </div>
+                    
+                    <div class="preview-panel hidden" id="studentPreviewPanel">
+                        <h5 class="mb-3">Xem trước danh sách sinh viên</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Mã sinh viên</th>
+                                        <th scope="col">Họ và tên</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Lớp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentPreviewBody">
+                                    <!-- Preview content will be filled dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- New validation section for all data -->
+                    <div class="validation-feedback mt-4 hidden" id="allDataValidationFeedback">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <span id="allDataValidationMessage">Nhấn "Xác thực và Tạo bài thi" để gửi dữ liệu lên server và tạo bài thi</span>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-secondary" id="downloadSampleStudents">
+                                <i class="fas fa-download me-2"></i>Tải xuống mẫu
+                            </button>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <button class="btn btn-outline-secondary me-2" id="backToStep2">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </button>
+                            <button class="btn btn-success" id="validateAndCreateQuiz">
+                                <i class="fas fa-check-circle me-2"></i>Xác thực và Tạo bài thi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Result -->
+                <div class="step-container hidden" id="step4">
+                    <div class="result-container">
+                        <div class="success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2>Tạo bài thi thành công!</h2>
+                        <p class="lead">Bài thi đã được tạo thành công và sẵn sàng để sinh viên làm bài.</p>
+                        
+                        <div class="mt-4">
+                            <p>Mã bài thi:</p>
+                            <div class="quiz-code" id="quizCode">QZ-12345</div>
+                            <button class="btn btn-sm btn-outline-primary" id="copyQuizCode">
+                                <i class="fas fa-copy me-1"></i> Sao chép
+                            </button>
+                        </div>
+                        
+                        <div class="mt-4 mb-3">
+                            <p>Thông báo đã được gửi đến <span id="studentCount">25</span> sinh viên.</p>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-primary me-2" id="viewQuizDetails">
+                                <i class="fas fa-info-circle me-1"></i> Chi tiết bài thi
+                            </button>
+                            <button class="btn btn-outline-primary" id="createNewQuiz">
+                                <i class="fas fa-plus me-1"></i> Tạo bài thi mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Side Progress Bar -->
+            <div class="col-lg-3">
+                <div id="sideProgressBar" class="step-container">
+                    <h5 class="mb-4">Tiến trình tạo bài thi</h5>
+                    <ul class="list-unstyled" id="progress-container">
+                        <li class="progress-step active" id="progress-step1">
+                            <div class="progress-marker">1</div>
+                            <div class="progress-text">
+                                <h6 class="progress-title">Import câu hỏi</h6>
+                                <p class="progress-info">Đang nhập liệu...</p>
+                            </div>
+                        </li>
+                        <li class="progress-step" id="progress-step2">
+                            <div class="progress-marker">2</div>
+                            <div class="progress-text">
+                                <h6 class="progress-title">Cấu hình bài thi</h6>
+                                <p class="progress-info">Chưa bắt đầu</p>
+                            </div>
+                        </li>
+                        <li class="progress-step" id="progress-step3">
+                            <div class="progress-marker">3</div>
+                            <div class="progress-text">
+                                <h6 class="progress-title">Import sinh viên</h6>
+                                <p class="progress-info">Chưa bắt đầu</p>
+                            </div>
+                        </li>
+                        <li class="progress-step" id="progress-step4">
+                            <div class="progress-marker">4</div>
+                            <div class="progress-text">
+                                <h6 class="progress-title">Hoàn thành</h6>
+                                <p class="progress-info">Chưa bắt đầu</p>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <div class="quiz-info mt-4" id="currentQuizInfo">
+                        <h6>Thông tin bài thi hiện tại</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Tiêu đề
+                                <span id="infoQuizTitle">-</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Số câu hỏi
+                                <span id="infoQuestionCount">-</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Thời gian
+                                <span id="infoDuration">-</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Số sinh viên
+                                <span id="infoStudentCount">-</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
