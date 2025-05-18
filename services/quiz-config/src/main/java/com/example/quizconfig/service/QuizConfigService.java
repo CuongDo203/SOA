@@ -20,13 +20,15 @@ public class QuizConfigService {
                 .questionCount(dto.getQuestionCount())
                 .maxScore(dto.getMaxScore())
                 .rules(dto.getRules())
+                .start(dto.getStart())
+                .end(dto.getEnd())
                 .build();
         config = repository.save(config);
         dto.setId(config.getId());
         return dto;
     }
 
-    public Optional<QuizConfigDTO> getQuizConfig(Long id) {
+    public Optional<QuizConfigDTO> getQuizConfig(String id) {
         return repository.findById(id)
                 .map(config -> QuizConfigDTO.builder()
                         .id(config.getId())

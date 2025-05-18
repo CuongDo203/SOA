@@ -5,12 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateQuizRequest {
     private String quizTitle;
-    private byte[] rawQuizDataBytes;
+    private List<StudentCreationRequest> students;
+    private QuizConfigDTO quizConfig;
 
 }

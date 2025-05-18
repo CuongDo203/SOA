@@ -1,8 +1,14 @@
-package main.java.com.example.quizconfig.dto;
+package com.example.quizconfig.dto;
 
 import lombok.*;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class QuizConfigDTO {
     private String id;
     private String quizName;
@@ -11,4 +17,6 @@ public class QuizConfigDTO {
     private Double maxScore;
     private String rules;
     private String quizCode;
+    private LocalDateTime start;
+    private LocalDateTime end;
 }
