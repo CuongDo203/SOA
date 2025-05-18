@@ -1,0 +1,4 @@
+com\microservice\notification_service\event\EventConsumer.class
+com\microservice\notification_service\NotificationServiceApplication.class
+com\microservice\notification_service\configuration\KafkaConsumerConfig.class
+com\microservice\notification_service\controller\EmailController.class
