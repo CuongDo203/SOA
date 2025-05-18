@@ -18,7 +18,7 @@ public class QuizConfigController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuizConfigDTO> get(@PathVariable Long id) {
+    public ResponseEntity<QuizConfigDTO> get(@PathVariable String id) {
         return service.getQuizConfig(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
