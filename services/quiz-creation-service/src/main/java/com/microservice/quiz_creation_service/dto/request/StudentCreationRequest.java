@@ -1,8 +1,9 @@
-package com.microservice.student_service.dto.request;
+package com.microservice.quiz_creation_service.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,10 +12,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StudentCheckRequest {
+public class StudentCreationRequest {
 
     @JsonProperty("student_code")
     @NotBlank(message = "STUDENT_CODE_REQUIRED")
+    @Pattern(regexp = "^[BE]\\d{2}DCCN\\d{3}$", message = "STUDENT_CODE_INVALID_FORMAT")
     String studentCode;
 
     @JsonProperty("first_name")

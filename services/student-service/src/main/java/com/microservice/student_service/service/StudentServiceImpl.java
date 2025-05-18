@@ -1,6 +1,7 @@
 package com.microservice.student_service.service;
 
 import com.microservice.event.dto.NotificationEvent;
+import com.microservice.student_service.dto.request.StudentCheckRequest;
 import com.microservice.student_service.dto.request.StudentCreationRequest;
 import com.microservice.student_service.dto.response.StudentCheckResponse;
 import com.microservice.student_service.dto.response.StudentResponse;
@@ -16,10 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -68,13 +66,13 @@ public class StudentServiceImpl implements StudentService{
         BeanUtils.copyProperties(student, response);
 
         //Test gui email
-        NotificationEvent notificationEvent = NotificationEvent.builder()
-                .chanel("EMAIL")
-                .recipient(student.getEmail())
-                .subject("Test email voi spring boot")
-                .body("Hello, " + student.getFirstName()+" "+student.getLastName())
-                .build();
-        kafkaTemplate.send("test-email", notificationEvent);
+//        NotificationEvent notificationEvent = NotificationEvent.builder()
+//                .chanel("EMAIL")
+//                .recipient(student.getEmail())
+//                .subject("Test email voi spring boot")
+//                .body("Hello, " + student.getFirstName()+" "+student.getLastName())
+//                .build();
+//        kafkaTemplate.send("test-email", notificationEvent);
         return response;
     }
 
@@ -91,10 +89,12 @@ public class StudentServiceImpl implements StudentService{
     }
 
     @Override
-    public StudentCheckResponse checkStudentExistence(Set<String> studentCodes) {
-        if(studentCodes == null || studentCodes.isEmpty()) {
+    public StudentCheckResponse checkStudentExistence(List<StudentCheckRequest> students) {
+        if(students == null || students.isEmpty()) {
             return StudentCheckResponse.builder().existingCodes(Set.of()).nonExistingCodes(Set.of()).build();
         }
+        Set<String> studentCodes = students.stream().map(StudentCheckRequest::getStudentCode)
+                .collect(Collectors.toSet());
         List<Student> existingStudents = studentRepository.findByStudentCodes(studentCodes);
         Set<String> existingCodes = existingStudents.stream().map(Student::getStudentCode).collect(Collectors.toSet());
         Set<String> nonExistingCodes = new HashSet<>(studentCodes);
@@ -105,5 +105,28 @@ public class StudentServiceImpl implements StudentService{
                 .build();
     }
 
+    @Override
+    public List<StudentResponse> getStudentsByIds(List<String> ids) {
+        log.info("Getting students with IDs: {}", ids);
 
+        if (ids == null || ids.isEmpty()) {
+            log.warn("Empty or null list of IDs provided");
+            return Collections.emptyList();
+        }
+
+        List<Student> students = studentRepository.findAllById(ids);
+
+        log.info("Found {} students out of {} requested IDs", students.size(), ids.size());
+
+        return students.stream()
+                .map(student -> StudentResponse.builder()
+                        .id(student.getId())
+                        .studentCode(student.getStudentCode())
+                        .firstName(student.getFirstName())
+                        .lastName(student.getLastName())
+                        .email(student.getEmail())
+                        .className(student.getClassName())
+                        .build())
+                .collect(Collectors.toList());
+    }
 }

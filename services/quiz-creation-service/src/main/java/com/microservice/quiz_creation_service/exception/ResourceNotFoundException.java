@@ -1,4 +1,4 @@
-package com.microservice.student_service.exception;
+package com.microservice.quiz_creation_service.exception;
 
 public class ResourceNotFoundException extends RuntimeException{
 

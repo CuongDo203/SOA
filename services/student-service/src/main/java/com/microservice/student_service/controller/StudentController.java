@@ -1,21 +1,21 @@
 package com.microservice.student_service.controller;
 
+import com.microservice.student_service.dto.request.ListStudentCheckRequest;
 import com.microservice.student_service.dto.request.StudentCheckRequest;
 import com.microservice.student_service.dto.request.StudentCreationRequest;
+import com.microservice.student_service.dto.request.StudentIdsRequest;
 import com.microservice.student_service.dto.response.ApiResponse;
 import com.microservice.student_service.dto.response.StudentCheckResponse;
 import com.microservice.student_service.dto.response.StudentResponse;
-import com.microservice.student_service.entity.Student;
 import com.microservice.student_service.service.StudentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/v1/students")
@@ -64,11 +64,24 @@ public class StudentController {
     }
 
     @PostMapping("/check-existence")
-    public ApiResponse<StudentCheckResponse> checkStudentExistence(@Valid @RequestBody StudentCheckRequest request) {
-        StudentCheckResponse studentCheckResponse = studentService.checkStudentExistence(request.getStudentCodes());
+    public ApiResponse<StudentCheckResponse> checkStudentExistence(@Valid @RequestBody ListStudentCheckRequest request) {
+        List<StudentCheckRequest> studentCheckRequests = request.getStudentChecks();
+        StudentCheckResponse studentCheckResponse = studentService.checkStudentExistence(studentCheckRequests);
         return ApiResponse.<StudentCheckResponse>builder()
                 .message("Student existence check completed!")
                 .result(studentCheckResponse)
+                .build();
+    }
+
+    @PostMapping("/by-ids")
+    public ApiResponse<List<StudentResponse>> getStudentsByIds(@RequestBody StudentIdsRequest request) {
+        log.info("Received request to get students by IDs: {}", request.getIds());
+        log.info("IDs: {}", request.getIds());
+        List<StudentResponse> students = studentService.getStudentsByIds(request.getIds());
+
+        return ApiResponse.<List<StudentResponse>>builder()
+                .message("Get students by IDs successfully!")
+                .result(students)
                 .build();
     }
 }
