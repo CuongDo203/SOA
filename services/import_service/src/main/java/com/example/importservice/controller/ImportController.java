@@ -1,50 +1,79 @@
 package com.example.importservice.controller;
 
 import com.example.importservice.dto.QuestionDTO;
-import com.example.importservice.service.ImportServiceImpl;
-import jakarta.validation.Valid;
+import com.example.importservice.service.ImportServiceImpl; // Hoặc interface nếu có
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/import") // Base path cho tất cả các endpoint trong controller này
+@RequestMapping("/api/import") // Hoặc một path phù hợp hơn
 public class ImportController {
 
-    @Autowired // Tiêm ImportServiceImpl vào đây
-    private ImportServiceImpl importService;
+    private static final Logger log = LoggerFactory.getLogger(ImportController.class);
 
-    @PostMapping("/questions") // Endpoint: POST /api/v1/import/questions
-    public ResponseEntity<List<QuestionDTO>> importQuestions(@Valid @RequestBody List<QuestionDTO> questions) {
-        // @Valid sẽ kích hoạt validation cho danh sách QuestionDTO và từng QuestionDTO bên trong
-        // @RequestBody nghĩa là danh sách questions sẽ được lấy từ body của HTTP request (dưới dạng JSON)
+    @Autowired
+    private ImportServiceImpl importService; // Sử dụng implementation trực tiếp hoặc interface
 
-        if (questions == null || questions.isEmpty()) {
-            // Trả về bad request nếu không có câu hỏi nào được gửi
-            return ResponseEntity.badRequest().body(null); // Hoặc một thông báo lỗi cụ thể
+    // Client để gọi QuizCreationService (ví dụ dùng Feign)
+    // @Autowired
+    // private QuizCreationServiceClient quizCreationServiceClient;
+
+    @PostMapping("/questions/excel")
+    public ResponseEntity<?> uploadAndParseQuestionsExcel(@RequestParam("file") MultipartFile excelFile) {
+        if (excelFile.isEmpty()) {
+            return ResponseEntity.badRequest().body("Please select an Excel file to upload.");
         }
 
-        List<QuestionDTO> importedQuestions = importService.importQuestions(questions);
+        // Kiểm tra kiểu file nếu cần
+        String contentType = excelFile.getContentType();
+        if (contentType == null ||
+                !(contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") || // .xlsx
+                        contentType.equals("application/vnd.ms-excel"))) { // .xls
+            log.warn("Invalid file type uploaded: {}", contentType);
+            return ResponseEntity.badRequest().body("Invalid file type. Please upload an Excel file (.xls or .xlsx).");
+        }
 
-        // Quyết định response code dựa trên kết quả import
-        if (importedQuestions.size() == questions.size()) {
-            // Tất cả câu hỏi được import thành công
-            return ResponseEntity.ok(importedQuestions);
-        } else if (!importedQuestions.isEmpty()) {
-            // Một vài câu hỏi được import, một vài câu không
-            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(importedQuestions);
-        } else {
-            // Không câu hỏi nào được import (có thể do lỗi toàn bộ hoặc input rỗng đã xử lý ở trên)
-            // Bạn có thể trả về INTERNAL_SERVER_ERROR nếu lỗi xảy ra ở service,
-            // hoặc một status khác tùy theo logic xử lý lỗi của bạn.
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>()); // Trả về danh sách rỗng
+        try {
+            log.info("Received file for question import: {}", excelFile.getOriginalFilename());
+            List<QuestionDTO> parsedQuestions = importService.parseQuestionsFromExcel(excelFile);
+
+            if (parsedQuestions.isEmpty()) {
+                log.info("No questions were parsed from the file: {}", excelFile.getOriginalFilename());
+                return ResponseEntity.ok("File processed, but no valid questions found or the file was empty after the header.");
+            }
+
+            log.info("Successfully parsed {} questions from file {}.", parsedQuestions.size(), excelFile.getOriginalFilename());
+
+            // BƯỚC TIẾP THEO: Gửi `parsedQuestions` đến Quiz Creation Service
+            // Ví dụ:
+            // ResponseEntity<String> creationResponse = quizCreationServiceClient.createQuizWithQuestions(parsedQuestions);
+            // return creationResponse;
+
+            // Hiện tại, chỉ trả về danh sách đã parse để kiểm tra
+            return ResponseEntity.ok(parsedQuestions);
+
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid argument during question import: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (IOException e) {
+            log.error("IO error during question import: {}", excelFile.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing the Excel file: " + e.getMessage());
+        } catch (Exception e) { // Bắt các lỗi không lường trước khác
+            log.error("Unexpected error during question import: {}", excelFile.getOriginalFilename(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred: " + e.getMessage());
         }
     }
 }

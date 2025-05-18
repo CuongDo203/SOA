@@ -1,30 +1,25 @@
 package com.example.importservice.dto;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
-import java.util.List;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Data
+@Data // Bao gồm @Getter, @Setter, @ToString, @EqualsAndHashCode, @RequiredArgsConstructor
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder // Nếu bạn muốn dùng builder pattern để tạo QuestionDTO
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class QuestionDTO {
-    private Long id;
 
-    @NotBlank(message = "Question content cannot be blank")
+    private Long id; // Có thể được gán bởi service khác sau khi tạo
     private String content;
+    private String ansA;
+    private String ansB;
+    private String ansC;
+    private String ansD;
+    private String correctAns; // Ví dụ: "A", "B", "C", "D"
+    private Long subjectId;
+    private Long levelId;
 
-    @NotEmpty(message = "Options cannot be empty")
-    @Size(min = 2, message = "At least two options are required")
-    private List<String> options;
-
-    @NotNull(message = "Correct answer index cannot be null")
-    private Integer correctAnswerIndex;
-
-    private String subject;
-    private String difficulty;
+    // Không cần viết thủ công getters, setters, toString, v.v. nữa
+    // Lombok sẽ tự động tạo chúng.
 }
