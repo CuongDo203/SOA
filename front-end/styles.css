@@ -1,0 +1,182 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.quiz-creator-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+}
+.step-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.step-number {
+    background-color: #4e73df;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+}
+.step-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+.nav-pills .nav-link.active {
+    background-color: #4e73df;
+}
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2e59d9;
+}
+.file-upload {
+    position: relative;
+    overflow: hidden;
+    margin: 10px 0;
+    text-align: center;
+    padding: 30px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.file-upload:hover {
+    border-color: #4e73df;
+    background-color: #f8f9fa;
+}
+.file-upload input[type=file] {
+    /* ĐÂY LÀ ĐOẠN ĐƯỢC SỬA */
+    display: none; /* Thêm dòng này để ẩn hoàn toàn input */
+    /* Các thuộc tính cũ của opacity, position: absolute không cần thiết nữa nếu dùng display: none */
+    /* Hoặc nếu bạn muốn giữ position: absolute để có thể dùng cách khác, thì chỉ cần thêm display: none; */
+}
+.upload-icon {
+    font-size: 48px;
+    color: #4e73df;
+    margin-bottom: 15px;
+}
+#progress-container {
+    margin-top: 40px;
+}
+.progress-step {
+    position: relative;
+    list-style: none;
+    margin-bottom: 30px;
+}
+.progress-step::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 30px;
+    height: calc(100% + 30px);
+    width: 2px;
+    background-color: #dee2e6;
+}
+.progress-step:last-child::before {
+    display: none;
+}
+.progress-marker {
+    position: relative; /* Cần thiết cho icon check */
+    width: 30px;
+    height: 30px;
+    background-color: #dee2e6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold; /* Để hiển thị số bước */
+    margin-right: 15px;
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* Thêm transition */
+}
+.progress-step.active .progress-marker {
+    background-color: #4e73df;
+    color: white;
+}
+.progress-step.completed .progress-marker {
+    background-color: #28a745;
+    color: white;
+}
+/* THÊM CSS ĐỂ HIỂN THỊ DẤU CHECK VÀO MARKER KHI HOÀN THÀNH */
+.progress-step.completed .progress-marker::after {
+    content: '\f00c'; /* Font Awesome check icon */
+    font-family: 'Font Awesome 6 Free'; /* Đảm bảo Font Awesome được tải */
+    font-weight: 900; /* Font weight cần thiết cho solid icons */
+    color: white;
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.progress-text {
+    margin-left: 45px;
+    margin-top: -25px; /* Điều chỉnh để thẳng hàng với marker */
+}
+.progress-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+.progress-info {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+.validation-feedback {
+    margin-top: 15px;
+}
+.quiz-sample-table {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+.preview-panel {
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+#configForm label {
+    font-weight: 500;
+}
+.result-container {
+    text-align: center;
+    padding: 30px 20px;
+}
+.quiz-code {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4e73df;
+    margin: 20px 0;
+    padding: 10px;
+    border: 2px dashed #4e73df;
+    display: inline-block;
+    border-radius: 5px;
+}
+.success-icon {
+    font-size: 64px;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+.hidden {
+    display: none !important; /* Thêm !important để đảm bảo ghi đè các style khác */
+}
+#sideProgressBar {
+    position: sticky;
+    top: 30px;
+}
