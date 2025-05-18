@@ -64,17 +64,10 @@ body {
     background-color: #f8f9fa;
 }
 .file-upload input[type=file] {
-    position: absolute;
-    top: 0;
-    right: 0;
-    margin: 0;
-    padding: 0;
-    font-size: 20px;
-    cursor: pointer;
-    opacity: 0;
-    filter: alpha(opacity=0);
-    height: 100%;
-    width: 100%;
+    /* ĐÂY LÀ ĐOẠN ĐƯỢC SỬA */
+    display: none; /* Thêm dòng này để ẩn hoàn toàn input */
+    /* Các thuộc tính cũ của opacity, position: absolute không cần thiết nữa nếu dùng display: none */
+    /* Hoặc nếu bạn muốn giữ position: absolute để có thể dùng cách khác, thì chỉ cần thêm display: none; */
 }
 .upload-icon {
     font-size: 48px;
@@ -102,7 +95,7 @@ body {
     display: none;
 }
 .progress-marker {
-    position: relative;
+    position: relative; /* Cần thiết cho icon check */
     width: 30px;
     height: 30px;
     background-color: #dee2e6;
@@ -110,6 +103,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: bold; /* Để hiển thị số bước */
+    margin-right: 15px;
+    transition: background-color 0.3s ease, border-color 0.3s ease; /* Thêm transition */
 }
 .progress-step.active .progress-marker {
     background-color: #4e73df;
@@ -119,9 +115,21 @@ body {
     background-color: #28a745;
     color: white;
 }
+/* THÊM CSS ĐỂ HIỂN THỊ DẤU CHECK VÀO MARKER KHI HOÀN THÀNH */
+.progress-step.completed .progress-marker::after {
+    content: '\f00c'; /* Font Awesome check icon */
+    font-family: 'Font Awesome 6 Free'; /* Đảm bảo Font Awesome được tải */
+    font-weight: 900; /* Font weight cần thiết cho solid icons */
+    color: white;
+    font-size: 12px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 .progress-text {
     margin-left: 45px;
-    margin-top: -25px;
+    margin-top: -25px; /* Điều chỉnh để thẳng hàng với marker */
 }
 .progress-title {
     font-weight: 600;
@@ -166,7 +174,7 @@ body {
     margin-bottom: 20px;
 }
 .hidden {
-    display: none;
+    display: none !important; /* Thêm !important để đảm bảo ghi đè các style khác */
 }
 #sideProgressBar {
     position: sticky;
