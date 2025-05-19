@@ -10,5 +10,6 @@
     <file url="file://$PROJECT_DIR$/../services/quiz-creation-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/../services/quiz-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/../services/student-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/../services/validation-service/src/main/java" charset="UTF-8" />
   </component>
 </project>

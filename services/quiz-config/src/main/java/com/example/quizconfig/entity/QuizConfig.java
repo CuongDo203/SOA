@@ -1,5 +1,7 @@
 package com.example.quizconfig.entity;
 
+// import java.sql.Date;
+
 import jakarta.persistence.*;
 import lombok.*;
 

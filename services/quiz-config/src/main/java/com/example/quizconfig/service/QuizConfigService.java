@@ -18,6 +18,8 @@ public class QuizConfigService {
                 .quizName(dto.getQuizName())
                 .durationMinutes(dto.getDurationMinutes())
                 .questionCount(dto.getQuestionCount())
+                .start(dto.getStart())
+                .end(dto.getEnd())
                 .maxScore(dto.getMaxScore())
                 .rules(dto.getRules())
                 .start(dto.getStart())
@@ -35,6 +37,8 @@ public class QuizConfigService {
                         .quizName(config.getQuizName())
                         .durationMinutes(config.getDurationMinutes())
                         .questionCount(config.getQuestionCount())
+                        .start(config.getStart())
+                        .end(config.getEnd())
                         .maxScore(config.getMaxScore())
                         .rules(config.getRules())
                         .build());
