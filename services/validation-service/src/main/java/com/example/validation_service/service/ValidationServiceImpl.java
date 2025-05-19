@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 @Slf4j
@@ -64,14 +66,16 @@ public class ValidationServiceImpl implements ValidationService {
         if (request.getMaxScore() == null || request.getMaxScore() <= 0) {
             errors.add("Điểm của bài thi phải lớn hơn 0 !");
         }
-
+        if (request.getQuestionCount() == null || request.getQuestionCount() <= 0) {
+            errors.add("Số lượng câu hỏi phải lớn hơn 0 !");
+        }
         LocalDateTime now = LocalDateTime.now();
         if (request.getStart() == null) {
             errors.add("Thời gian bắt đầu không được để trống !");
         } else if (!request.getStart().isAfter(now)) {
             errors.add("Thời gian bắt đầu phải sau thời điểm hiện tại !");
         }
-
+        
         // Kiểm tra thời gian kết thúc và sự hợp lệ với thời gian bắt đầu
         if (request.getEnd() == null) {
             errors.add("Thời gian kết thúc không được để trống !");
@@ -94,13 +98,25 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validateStudents(StudentListRequest request) {
         List<String> errors = new ArrayList<>();
-        if (request.getStudentCodeList() == null || request.getStudentCodeList().isEmpty()) {
-            errors.add("Danh sách mã sinh viên không được để trống !");
+        List<StudentDto> students = request.getStudentCodeList();
+
+        if (students == null || students.isEmpty())  {
+            errors.add("Danh sách sinh viên không được để trống!");
         }
 
-        if (request.getStudentNameList() == null || request.getStudentNameList().isEmpty()) {
-            errors.add("Danh sách mã sinh viên không được để trống !");
+        if (students != null && !students.isEmpty()) {
+            Set<String> seen = new HashSet<>();
+            Set<String> duplicates = new HashSet<>();
+            for (StudentDto student : students) {
+                if (!seen.add(student.getStudentCode())) {
+                    duplicates.add(student.getStudentCode());
+                }
+            }
+            if (!duplicates.isEmpty()) {
+                errors.add("Có mã sinh viên bị trùng: " + String.join(", ", duplicates));
+            }
         }
+        
         // Thêm các rule kiểm tra mã sinh viên, format...
         return new ValidationResult(errors.isEmpty(), errors);
     }
