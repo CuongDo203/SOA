@@ -19,5 +19,4 @@ public class ValidationResult {
     public List<String> getErrors(){
         return this.errors;
     }
-    // getter, setter
 }

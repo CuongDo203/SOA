@@ -26,7 +26,6 @@ public class ImportController {
 
     @PostMapping("/questions/excel")
     public ResponseEntity<?> uploadAndParseQuestionsExcel(@RequestPart("file") MultipartFile excelFile) {
-        // ... (code endpoint upload questions của bạn giữ nguyên) ...
         if (excelFile.isEmpty()) {
             return ResponseEntity.badRequest().body("Please select an Excel file for questions.");
         }
@@ -60,16 +59,13 @@ public class ImportController {
         }
     }
 
-    // --- ENDPOINT MỚI ĐỂ IMPORT STUDENTS ---
     @PostMapping("/students/excel")
     public ResponseEntity<?> uploadAndParseStudentsExcel(@RequestPart("file") MultipartFile excelFile) {
         if (excelFile.isEmpty()) {
             return ResponseEntity.badRequest().body("Please select an Excel file for students.");
         }
 
-        // Kiểm tra kiểu file (tương tự như question, nhưng có thể bạn muốn cho phép .csv cho student)
         String contentType = excelFile.getContentType();
-        // Ví dụ: cho phép cả xls, xlsx, csv
         if (contentType == null ||
                 !(contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") || // .xlsx
                         contentType.equals("application/vnd.ms-excel") || // .xls

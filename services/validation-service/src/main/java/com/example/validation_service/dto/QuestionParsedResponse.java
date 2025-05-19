@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuestionDto{
+public class QuestionParsedResponse {
 
 //    private String id;
     @JsonProperty("content")

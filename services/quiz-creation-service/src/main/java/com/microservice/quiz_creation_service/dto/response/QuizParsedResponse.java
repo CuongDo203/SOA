@@ -1,6 +1,5 @@
-package com.microservice.quiz_creation_service.dto.request;
+package com.microservice.quiz_creation_service.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,11 +9,9 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class QuizConfigDTO {
-    private String id;
+@NoArgsConstructor
+public class QuizParsedResponse {
     private Integer durationMinutes; // Thời gian làm bài (phút)
     private Integer questionCount;   // Số lượng câu hỏi
     private Double maxScore;         // Điểm tối đa

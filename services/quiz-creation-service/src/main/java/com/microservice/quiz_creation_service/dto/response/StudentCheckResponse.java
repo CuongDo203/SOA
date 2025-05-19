@@ -1,4 +1,4 @@
-package com.microservice.student_service.dto.response;
+package com.microservice.quiz_creation_service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

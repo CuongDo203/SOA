@@ -39,5 +39,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ApiResponse> handleValidationException(ValidationException ex) {
+        ApiResponse apiResponse = ApiResponse.builder()
+                .code(ErrorCode.VALIDATION_ERROR.getCode())
+                .message(ex.getMessage())
+                .result(ex.getErrors())
+                .build();
+        return ResponseEntity.status(ErrorCode.VALIDATION_ERROR.getStatusCode()).body(apiResponse);
+    }
 
 }

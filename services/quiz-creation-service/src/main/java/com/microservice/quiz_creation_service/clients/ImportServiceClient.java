@@ -16,9 +16,9 @@ import java.util.List;
         url = "http://localhost:8082/api/v1/import",
         configuration = FeignMultipartConfig.class)
 public interface ImportServiceClient {
-    @PostMapping(value = "/questions/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/questions/excel", consumes = "multipart/form-data")
     List<QuestionParsedResponse> importQuestionsFromExcel(@RequestPart(value = "file") MultipartFile excelFile);
 
-    @PostMapping(value = "/students/excel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/students/excel", consumes = "multipart/form-data")
     List<StudentParsedResponse> importStudentsFromExcel(@RequestPart(value = "file") MultipartFile excelFile);
 }

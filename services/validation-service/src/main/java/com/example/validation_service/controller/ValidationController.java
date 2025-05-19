@@ -1,7 +1,7 @@
 package com.example.validation_service.controller;
 
 import com.example.validation_service.dto.QuestionListRequest;
-import com.example.validation_service.dto.QuizConfigRequest;
+import com.example.validation_service.dto.QuizConfigDTO;
 import com.example.validation_service.dto.StudentListRequest;
 import com.example.validation_service.service.ValidationService;
 import com.example.validation_service.dto.ValidationResult;
@@ -22,7 +22,7 @@ public class ValidationController {
     }
 
     @PostMapping("/quiz-config")
-    public ResponseEntity<ValidationResult> validateQuizConfig(@RequestBody QuizConfigRequest request) {
+    public ResponseEntity<ValidationResult> validateQuizConfig(@RequestBody QuizConfigDTO request) {
         return ResponseEntity.ok(validationService.validateQuizConfig(request));
     }
 

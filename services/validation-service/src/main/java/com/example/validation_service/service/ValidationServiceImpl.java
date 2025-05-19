@@ -1,7 +1,6 @@
 package com.example.validation_service.service;
 
 import com.example.validation_service.dto.*;
-import com.example.validation_service.service.ValidationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,30 +18,30 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validateQuestions(QuestionListRequest request) {
         List<String> errors = new ArrayList<>();
-        List<QuestionDto> questionDtos = request.getQuestions();
-        for (int i = 0; i < questionDtos.size(); i++) {
-            QuestionDto questionDto = questionDtos.get(i);
-            if (questionDto.getContent() == null || questionDto.getContent().isEmpty()) {
+        List<QuestionParsedResponse> questionParsedResponses = request.getQuestions();
+        for (int i = 0; i < questionParsedResponses.size(); i++) {
+            QuestionParsedResponse questionParsedResponse = questionParsedResponses.get(i);
+            if (questionParsedResponse.getContent() == null || questionParsedResponse.getContent().isEmpty()) {
                 errors.add("Câu hỏi thứ " + (i + 1) + " không được để trống !");
             }
 
-            if (questionDto.getOptionA() == null || questionDto.getOptionA().isEmpty()) {
+            if (questionParsedResponse.getOptionA() == null || questionParsedResponse.getOptionA().isEmpty()) {
                 errors.add("Câu hỏi thứ " + (i + 1) + " không có câu lựa chọn A !");
             }
 
-            if (questionDto.getOptionB() == null || questionDto.getOptionB().isEmpty()) {
+            if (questionParsedResponse.getOptionB() == null || questionParsedResponse.getOptionB().isEmpty()) {
                 errors.add("Câu hỏi thứ " + (i + 1) + " không có câu lựa chọn B !");
             }
 
-            if (questionDto.getOptionC() == null || questionDto.getOptionC().isEmpty()) {
+            if (questionParsedResponse.getOptionC() == null || questionParsedResponse.getOptionC().isEmpty()) {
                 errors.add("Câu hỏi thứ " + (i + 1) + " không có câu lựa chọn C !");
             }
 
-            if (questionDto.getOptionD() == null || questionDto.getOptionD().isEmpty()) {
+            if (questionParsedResponse.getOptionD() == null || questionParsedResponse.getOptionD().isEmpty()) {
                 errors.add("Câu hỏi thứ " + (i + 1) + " không có câu lựa chọn D !");
             }
 
-            if (questionDto.getAnswerKey() == null || questionDto.getAnswerKey().isEmpty()) {
+            if (questionParsedResponse.getAnswerKey() == null || questionParsedResponse.getAnswerKey().isEmpty()) {
                 errors.add("Câu hỏi thứ " + (i + 1) + " phải có ít nhất một câu trả lời đúng !");
             }
         }
@@ -50,11 +49,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     @Override
-    public ValidationResult validateQuizConfig(QuizConfigRequest request) {
+    public ValidationResult validateQuizConfig(QuizConfigDTO request) {
         List<String> errors = new ArrayList<>();
-//        if (request.getQuizName() == null || request.getQuizName().isEmpty()) {
-//            errors.add("Quiz name không được để trống !");
-//        }
         log.info("durationTime: " + request.getDurationMinutes());
         log.info("maxScore: " + request.getMaxScore());
         log.info("startTime: " + request.getStart());
@@ -98,7 +94,7 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validateStudents(StudentListRequest request) {
         List<String> errors = new ArrayList<>();
-        List<StudentDto> students = request.getStudentCodeList();
+        List<StudentParsedResponse> students = request.getStudents();
 
         if (students == null || students.isEmpty())  {
             errors.add("Danh sách sinh viên không được để trống!");
@@ -107,7 +103,7 @@ public class ValidationServiceImpl implements ValidationService {
         if (students != null && !students.isEmpty()) {
             Set<String> seen = new HashSet<>();
             Set<String> duplicates = new HashSet<>();
-            for (StudentDto student : students) {
+            for (StudentParsedResponse student : students) {
                 if (!seen.add(student.getStudentCode())) {
                     duplicates.add(student.getStudentCode());
                 }

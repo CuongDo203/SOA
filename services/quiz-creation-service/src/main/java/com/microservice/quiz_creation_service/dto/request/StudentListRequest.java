@@ -1,4 +1,5 @@
-package com.example.validation_service.dto;
+package com.microservice.quiz_creation_service.dto.request;
+import com.microservice.quiz_creation_service.dto.response.StudentParsedResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,6 +1,5 @@
 package com.microservice.student_service.service;
 
-import com.microservice.event.dto.NotificationEvent;
 import com.microservice.student_service.dto.request.StudentCheckRequest;
 import com.microservice.student_service.dto.request.StudentCreationRequest;
 import com.microservice.student_service.dto.response.StudentCheckResponse;
@@ -64,15 +63,6 @@ public class StudentServiceImpl implements StudentService{
         //Test publish message to kafka
         StudentResponse response = new StudentResponse();
         BeanUtils.copyProperties(student, response);
-
-        //Test gui email
-//        NotificationEvent notificationEvent = NotificationEvent.builder()
-//                .chanel("EMAIL")
-//                .recipient(student.getEmail())
-//                .subject("Test email voi spring boot")
-//                .body("Hello, " + student.getFirstName()+" "+student.getLastName())
-//                .build();
-//        kafkaTemplate.send("test-email", notificationEvent);
         return response;
     }
 
@@ -91,17 +81,37 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public StudentCheckResponse checkStudentExistence(List<StudentCheckRequest> students) {
         if(students == null || students.isEmpty()) {
-            return StudentCheckResponse.builder().existingCodes(Set.of()).nonExistingCodes(Set.of()).build();
+            return StudentCheckResponse.builder()
+                    .existingCodes(Set.of())
+                    .nonExistingCodes(Set.of())
+                    .studentCodeToIdMap(Map.of())
+                    .build();
         }
-        Set<String> studentCodes = students.stream().map(StudentCheckRequest::getStudentCode)
+
+        Set<String> studentCodes = students.stream()
+                .map(StudentCheckRequest::getStudentCode)
                 .collect(Collectors.toSet());
+
         List<Student> existingStudents = studentRepository.findByStudentCodes(studentCodes);
-        Set<String> existingCodes = existingStudents.stream().map(Student::getStudentCode).collect(Collectors.toSet());
+
+        Set<String> existingCodes = existingStudents.stream()
+                .map(Student::getStudentCode)
+                .collect(Collectors.toSet());
+
+        // Create a map of student codes to their IDs
+        Map<String, String> studentCodeToIdMap = existingStudents.stream()
+                .collect(Collectors.toMap(
+                        Student::getStudentCode,
+                        Student::getId
+                ));
+
         Set<String> nonExistingCodes = new HashSet<>(studentCodes);
         nonExistingCodes.removeAll(existingCodes);
+
         return StudentCheckResponse.builder()
                 .existingCodes(existingCodes)
                 .nonExistingCodes(nonExistingCodes)
+                .studentCodeToIdMap(studentCodeToIdMap)
                 .build();
     }
 

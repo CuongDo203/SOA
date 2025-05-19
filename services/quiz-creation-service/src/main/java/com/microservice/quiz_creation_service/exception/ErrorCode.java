@@ -7,6 +7,7 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_PROCESS_STATE_EXCEPTION(1001, "Invalid process state", HttpStatus.BAD_REQUEST),
     RESOURCE_NOT_FOUND_EXCEPTION(1002, "Resource not found", HttpStatus.NOT_FOUND),
+    VALIDATION_ERROR(1003, "Validation error", HttpStatus.BAD_REQUEST)
     ;
 
     private int code;
