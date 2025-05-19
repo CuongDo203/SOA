@@ -59,7 +59,9 @@ public class ValidationServiceImpl implements ValidationService {
         if (request.getMaxScore() == null || request.getMaxScore() <= 0) {
             errors.add("Điểm của bài thi phải lớn hơn 0 !");
         }
-
+        if (request.getQuestionCount() == null || request.getQuestionCount() <= 0) {
+            errors.add("Số lượng câu hỏi phải lớn hơn 0 !");
+        }
         LocalDateTime now = LocalDateTime.now();
         if (request.getStartTime() == null) {
             errors.add("Thời gian bắt đầu không được để trống !");
@@ -89,20 +91,18 @@ public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validateStudents(StudentListRequest request) {
         List<String> errors = new ArrayList<>();
-        List<String> studentCodeList = request.getStudentCodeList();
-        List<String> studentNameList = request.getStudentNameList();
+        List<StudentDto> students = request.getStudentCodeList();
 
-        if ((studentCodeList == null || request.getStudentCodeList().isEmpty()) 
-        && (studentNameList == null || studentNameList.isEmpty())) {
-            errors.add("Cần có danh sách mã sinh viên hoặc danh sách tên sinh viên không bị để trống!");
+        if (students == null || students.isEmpty())  {
+            errors.add("Danh sách sinh viên không được để trống!");
         }
 
-        if (studentCodeList != null && !studentCodeList.isEmpty()) {
+        if (students != null && !students.isEmpty()) {
             Set<String> seen = new HashSet<>();
             Set<String> duplicates = new HashSet<>();
-            for (String code : studentCodeList) {
-                if (!seen.add(code)) {
-                    duplicates.add(code);
+            for (StudentDto student : students) {
+                if (!seen.add(student.getStudentCode())) {
+                    duplicates.add(student.getStudentCode());
                 }
             }
             if (!duplicates.isEmpty()) {
