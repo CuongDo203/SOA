@@ -1,7 +1,7 @@
 package com.example.importservice.service;
 
-import com.example.importservice.dto.QuestionDTO;
-import com.example.importservice.dto.StudentDTO; // THÊM IMPORT NÀY
+import com.example.importservice.dto.QuestionParsedResponse;
+import com.example.importservice.dto.StudentParsedResponse; // THÊM IMPORT NÀY
 import org.apache.poi.ss.usermodel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,7 @@ public class ImportServiceImpl {
     // Thêm các cột khác nếu cần
 
 
-    public List<QuestionDTO> parseQuestionsFromExcel(MultipartFile excelFile) throws IOException {
+    public List<QuestionParsedResponse> parseQuestionsFromExcel(MultipartFile excelFile) throws IOException {
         // ... (code parseQuestionsFromExcel của bạn giữ nguyên) ...
         // Chỉ đổi tên hằng số cột để rõ ràng hơn (Q_COL_*)
         if (excelFile == null || excelFile.isEmpty()) {
@@ -46,7 +46,7 @@ public class ImportServiceImpl {
             throw new IllegalArgumentException("Uploaded Excel file for questions cannot be null or empty.");
         }
 
-        List<QuestionDTO> questions = new ArrayList<>();
+        List<QuestionParsedResponse> questions = new ArrayList<>();
         List<String> parsingErrors = new ArrayList<>();
 
         log.info("Processing Excel file for questions: {}", excelFile.getOriginalFilename());
@@ -74,9 +74,9 @@ public class ImportServiceImpl {
                 Row currentRow = rowIterator.next();
                 rowNumForLog++;
                 try {
-                    QuestionDTO questionDTO = parseRowToQuestionDTO(currentRow, excelFile.getOriginalFilename(), rowNumForLog);
-                    if (questionDTO != null) {
-                        questions.add(questionDTO);
+                    QuestionParsedResponse questionParsedResponse = parseRowToQuestionDTO(currentRow, excelFile.getOriginalFilename(), rowNumForLog);
+                    if (questionParsedResponse != null) {
+                        questions.add(questionParsedResponse);
                     }
                 } catch (Exception e) {
                     String errorMsg = String.format("Error parsing question row %d in file '%s': %s",
@@ -102,37 +102,37 @@ public class ImportServiceImpl {
         return questions;
     }
 
-    private QuestionDTO parseRowToQuestionDTO(Row row, String filename, int rowNumForLog) {
+    private QuestionParsedResponse parseRowToQuestionDTO(Row row, String filename, int rowNumForLog) {
         // Đổi tên hằng số cột để rõ ràng hơn (Q_COL_*)
         if (isRowEffectivelyEmpty(row, Q_COL_CONTENT)) { // Kiểm tra dựa trên cột content của Question
             log.debug("Skipping empty question row {} in file {}", rowNumForLog, filename);
             return null;
         }
-        QuestionDTO questionDTO = new QuestionDTO();
-        questionDTO.setContent(getCellValueAsString(row.getCell(Q_COL_CONTENT), filename, rowNumForLog, "Q_Content"));
-        questionDTO.setAnsA(getCellValueAsString(row.getCell(Q_COL_ANS_A), filename, rowNumForLog, "Q_AnsA"));
-        questionDTO.setAnsB(getCellValueAsString(row.getCell(Q_COL_ANS_B), filename, rowNumForLog, "Q_AnsB"));
-        questionDTO.setAnsC(getCellValueAsString(row.getCell(Q_COL_ANS_C), filename, rowNumForLog, "Q_AnsC"));
-        questionDTO.setAnsD(getCellValueAsString(row.getCell(Q_COL_ANS_D), filename, rowNumForLog, "Q_AnsD"));
-        questionDTO.setCorrectAns(getCellValueAsString(row.getCell(Q_COL_CORRECT_ANS), filename, rowNumForLog, "Q_CorrectAns"));
-        // questionDTO.setSubjectId(getCellValueAsLong(row.getCell(Q_COL_SUBJECT_ID), filename, rowNumForLog, "Q_SubjectId"));
-        // questionDTO.setLevelId(getCellValueAsLong(row.getCell(Q_COL_LEVEL_ID), filename, rowNumForLog, "Q_LevelId"));
-        if (questionDTO.getContent() == null || questionDTO.getContent().trim().isEmpty()) {
+        QuestionParsedResponse questionParsedResponse = new QuestionParsedResponse();
+        questionParsedResponse.setContent(getCellValueAsString(row.getCell(Q_COL_CONTENT), filename, rowNumForLog, "Q_Content"));
+        questionParsedResponse.setOptionA(getCellValueAsString(row.getCell(Q_COL_ANS_A), filename, rowNumForLog, "Q_AnsA"));
+        questionParsedResponse.setOptionB(getCellValueAsString(row.getCell(Q_COL_ANS_B), filename, rowNumForLog, "Q_AnsB"));
+        questionParsedResponse.setOptionC(getCellValueAsString(row.getCell(Q_COL_ANS_C), filename, rowNumForLog, "Q_AnsC"));
+        questionParsedResponse.setOptionD(getCellValueAsString(row.getCell(Q_COL_ANS_D), filename, rowNumForLog, "Q_AnsD"));
+        questionParsedResponse.setAnswerKey(getCellValueAsString(row.getCell(Q_COL_CORRECT_ANS), filename, rowNumForLog, "Q_CorrectAns"));
+        // questionParsedResponse.setSubjectId(getCellValueAsLong(row.getCell(Q_COL_SUBJECT_ID), filename, rowNumForLog, "Q_SubjectId"));
+        // questionParsedResponse.setLevelId(getCellValueAsLong(row.getCell(Q_COL_LEVEL_ID), filename, rowNumForLog, "Q_LevelId"));
+        if (questionParsedResponse.getContent() == null || questionParsedResponse.getContent().trim().isEmpty()) {
             log.warn("Question content is empty at row {} in file {}. Skipping this question.", rowNumForLog, filename);
             return null;
         }
-        return questionDTO;
+        return questionParsedResponse;
     }
 
 
     // --- PHƯƠNG THỨC MỚI ĐỂ PARSE STUDENT EXCEL ---
-    public List<StudentDTO> parseStudentsFromExcel(MultipartFile excelFile) throws IOException {
+    public List<StudentParsedResponse> parseStudentsFromExcel(MultipartFile excelFile) throws IOException {
         if (excelFile == null || excelFile.isEmpty()) {
             log.warn("Excel file (students) is null or empty.");
             throw new IllegalArgumentException("Uploaded Excel file for students cannot be null or empty.");
         }
 
-        List<StudentDTO> students = new ArrayList<>();
+        List<StudentParsedResponse> students = new ArrayList<>();
         List<String> parsingErrors = new ArrayList<>();
 
         log.info("Processing Excel file for students: {}", excelFile.getOriginalFilename());
@@ -161,9 +161,9 @@ public class ImportServiceImpl {
                 Row currentRow = rowIterator.next();
                 rowNumForLog++;
                 try {
-                    StudentDTO studentDTO = parseRowToStudentDTO(currentRow, excelFile.getOriginalFilename(), rowNumForLog);
-                    if (studentDTO != null) {
-                        students.add(studentDTO);
+                    StudentParsedResponse studentParsedResponse = parseRowToStudentDTO(currentRow, excelFile.getOriginalFilename(), rowNumForLog);
+                    if (studentParsedResponse != null) {
+                        students.add(studentParsedResponse);
                     }
                 } catch (Exception e) {
                     String errorMsg = String.format("Error parsing student row %d in file '%s': %s",
@@ -190,25 +190,25 @@ public class ImportServiceImpl {
         return students;
     }
 
-    private StudentDTO parseRowToStudentDTO(Row row, String filename, int rowNumForLog) {
+    private StudentParsedResponse parseRowToStudentDTO(Row row, String filename, int rowNumForLog) {
         // Kiểm tra dòng trống dựa trên cột studentCode (ví dụ)
         if (isRowEffectivelyEmpty(row, S_COL_STUDENT_CODE)) {
             log.debug("Skipping empty student row {} in file {}", rowNumForLog, filename);
             return null;
         }
 
-        StudentDTO studentDTO = new StudentDTO(); // Sử dụng constructor mặc định
-        // Hoặc dùng builder nếu bạn đã thêm @Builder vào StudentDTO
+        StudentParsedResponse studentParsedResponse = new StudentParsedResponse(); // Sử dụng constructor mặc định
+        // Hoặc dùng builder nếu bạn đã thêm @Builder vào StudentParsedResponse
 
-        studentDTO.setStudentCode(getCellValueAsString(row.getCell(S_COL_STUDENT_CODE), filename, rowNumForLog, "S_StudentCode"));
-        studentDTO.setFirstName(getCellValueAsString(row.getCell(S_COL_FIRST_NAME), filename, rowNumForLog, "S_FirstName"));
-        studentDTO.setLastName(getCellValueAsString(row.getCell(S_COL_LAST_NAME), filename, rowNumForLog, "S_LastName"));
-        studentDTO.setEmail(getCellValueAsString(row.getCell(S_COL_EMAIL), filename, rowNumForLog, "S_Email"));
-        studentDTO.setClassName(getCellValueAsString(row.getCell(S_COL_CLASS_NAME), filename, rowNumForLog, "S_ClassName"));
+        studentParsedResponse.setStudentCode(getCellValueAsString(row.getCell(S_COL_STUDENT_CODE), filename, rowNumForLog, "S_StudentCode"));
+        studentParsedResponse.setFirstName(getCellValueAsString(row.getCell(S_COL_FIRST_NAME), filename, rowNumForLog, "S_FirstName"));
+        studentParsedResponse.setLastName(getCellValueAsString(row.getCell(S_COL_LAST_NAME), filename, rowNumForLog, "S_LastName"));
+        studentParsedResponse.setEmail(getCellValueAsString(row.getCell(S_COL_EMAIL), filename, rowNumForLog, "S_Email"));
+        studentParsedResponse.setClassName(getCellValueAsString(row.getCell(S_COL_CLASS_NAME), filename, rowNumForLog, "S_ClassName"));
 
-        // Thêm validation cơ bản cho StudentDTO (ví dụ: studentCode không được rỗng)
-        // Bạn đã có @NotBlank trên StudentDTO, nhưng kiểm tra ở đây có thể cho log cụ thể hơn về dòng lỗi.
-        if (studentDTO.getStudentCode() == null || studentDTO.getStudentCode().trim().isEmpty()) {
+        // Thêm validation cơ bản cho StudentParsedResponse (ví dụ: studentCode không được rỗng)
+        // Bạn đã có @NotBlank trên StudentParsedResponse, nhưng kiểm tra ở đây có thể cho log cụ thể hơn về dòng lỗi.
+        if (studentParsedResponse.getStudentCode() == null || studentParsedResponse.getStudentCode().trim().isEmpty()) {
             log.warn("Student code is empty at row {} in file {}. Skipping this student.", rowNumForLog, filename);
             return null; // Hoặc ném lỗi tùy theo yêu cầu
         }
@@ -216,7 +216,7 @@ public class ImportServiceImpl {
         // Mặc dù @Email đã có trên DTO, việc kiểm tra ở đây có thể bắt lỗi sớm hơn
         // hoặc cho phép xử lý tùy chỉnh.
 
-        return studentDTO;
+        return studentParsedResponse;
     }
 
 
@@ -237,7 +237,7 @@ public class ImportServiceImpl {
     }
 
     private Long getCellValueAsLong(Cell cell, String filename, int rowNum, String columnName) {
-        // ... (giữ nguyên code của bạn, có thể không cần cho StudentDTO hiện tại) ...
+        // ... (giữ nguyên code của bạn, có thể không cần cho StudentParsedResponse hiện tại) ...
         String cellValue = getCellValueAsString(cell, filename, rowNum, columnName);
         if (cellValue == null) {
             return null;

@@ -6,11 +6,13 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/../services/import_service/pom.xml" />
-        <option value="$PROJECT_DIR$/../services/quiz-creation-service/pom.xml" />
-        <option value="$PROJECT_DIR$/../services/quiz-config/pom.xml" />
-        <option value="$PROJECT_DIR$/../services/question-service/pom.xml" />
         <option value="$PROJECT_DIR$/../services/notification-service/pom.xml" />
+        <option value="$PROJECT_DIR$/../services/question-service/pom.xml" />
+        <option value="$PROJECT_DIR$/../services/quiz-config/pom.xml" />
+        <option value="$PROJECT_DIR$/../services/quiz-creation-service/pom.xml" />
         <option value="$PROJECT_DIR$/../services/student-service/pom.xml" />
+        <option value="$PROJECT_DIR$/../gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/../services/quiz-service/pom.xml" />
       </list>
     </option>
   </component>

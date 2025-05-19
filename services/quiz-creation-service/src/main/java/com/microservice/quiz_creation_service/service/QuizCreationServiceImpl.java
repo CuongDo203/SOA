@@ -1,14 +1,8 @@
 package com.microservice.quiz_creation_service.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microservice.quiz_creation_service.clients.ImportServiceClient;
-import com.microservice.quiz_creation_service.clients.QuestionServiceClient;
-import com.microservice.quiz_creation_service.clients.QuizConfigServiceClient;
-import com.microservice.quiz_creation_service.clients.StudentServiceClient;
-import com.microservice.quiz_creation_service.dto.request.CreateQuestionRequest;
-import com.microservice.quiz_creation_service.dto.request.CreateQuizRequest;
-import com.microservice.quiz_creation_service.dto.request.QuizConfigDTO;
-import com.microservice.quiz_creation_service.dto.request.StudentCreationRequest;
+import com.microservice.quiz_creation_service.clients.*;
+import com.microservice.quiz_creation_service.dto.request.*;
 import com.microservice.quiz_creation_service.dto.response.*;
 import com.microservice.quiz_creation_service.entity.QuizCreationProcess;
 import com.microservice.quiz_creation_service.repository.QuizCreationProcessRepository;
@@ -37,6 +31,7 @@ public class QuizCreationServiceImpl implements QuizCreationService{
     StudentServiceClient studentServiceClient;
     QuizConfigServiceClient quizConfigServiceClient;
     QuestionServiceClient questionServiceClient;
+    QuizServiceClient quizServiceClient;
 
     KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -54,6 +49,29 @@ public class QuizCreationServiceImpl implements QuizCreationService{
         return response;
     }
 
+    @Override
+    public List<QuestionParsedResponse> importQuestionsFromExcel(MultipartFile excelFile) {
+        try {
+            return importServiceClient.importQuestionsFromExcel(excelFile);
+        }
+        catch (Exception e) {
+            log.error("Error when importing question: ", e);
+            throw new RuntimeException("Failed to import students from Excel", e);
+        }
+    }
+
+    @Override
+    public List<StudentParsedResponse> importStudentsFromExcel(MultipartFile excelFile) {
+        try {
+            return importServiceClient.importStudentsFromExcel(excelFile);
+        } catch (Exception e) {
+            log.error("Error when importing students: ", e);
+            throw new RuntimeException("Failed to import students from Excel", e);
+        }
+    }
+
+    @Transactional
+    @Override
     public CreateQuizResponse createQuiz(CreateQuizRequest createQuizRequest) {
         List<StudentCreationRequest> students = createQuizRequest.getStudents();
         CreateQuizResponse response = new CreateQuizResponse();
@@ -92,6 +110,14 @@ public class QuizCreationServiceImpl implements QuizCreationService{
             savedQuestionIds.add(questionData.getId());
         }
         response.setQuestionIds(savedQuestionIds);
+        QuizDTO quizDto = QuizDTO.builder()
+                .title(createQuizRequest.getQuizTitle())
+                .quizConfigId(savedQuizConfig.getId())
+                .questionIds(savedQuestionIds)
+                .assignedStudentIds(savedStudentIds)
+                .build();
+        response = quizServiceClient.createQuiz(quizDto);
+        log.info("Quiz created: {}", response);
         return response;
     }
 }

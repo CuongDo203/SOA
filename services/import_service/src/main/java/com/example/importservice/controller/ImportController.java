@@ -1,25 +1,21 @@
 package com.example.importservice.controller;
 
-import com.example.importservice.dto.QuestionDTO;
-import com.example.importservice.dto.StudentDTO; // THÊM IMPORT NÀY
+import com.example.importservice.dto.QuestionParsedResponse;
+import com.example.importservice.dto.StudentParsedResponse; // THÊM IMPORT NÀY
 import com.example.importservice.service.ImportServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/import")
+@RequestMapping("/api/v1/import")
 @CrossOrigin(origins = "*")
 public class ImportController {
 
@@ -29,7 +25,7 @@ public class ImportController {
     private ImportServiceImpl importService;
 
     @PostMapping("/questions/excel")
-    public ResponseEntity<?> uploadAndParseQuestionsExcel(@RequestParam("file") MultipartFile excelFile) {
+    public ResponseEntity<?> uploadAndParseQuestionsExcel(@RequestPart("file") MultipartFile excelFile) {
         // ... (code endpoint upload questions của bạn giữ nguyên) ...
         if (excelFile.isEmpty()) {
             return ResponseEntity.badRequest().body("Please select an Excel file for questions.");
@@ -43,7 +39,7 @@ public class ImportController {
         }
         try {
             log.info("Received file for question import: {}", excelFile.getOriginalFilename());
-            List<QuestionDTO> parsedQuestions = importService.parseQuestionsFromExcel(excelFile);
+            List<QuestionParsedResponse> parsedQuestions = importService.parseQuestionsFromExcel(excelFile);
             if (parsedQuestions.isEmpty()) {
                 log.info("No questions were parsed from the file: {}", excelFile.getOriginalFilename());
                 return ResponseEntity.ok("File processed (questions), but no valid questions found or the file was empty after the header.");
@@ -66,7 +62,7 @@ public class ImportController {
 
     // --- ENDPOINT MỚI ĐỂ IMPORT STUDENTS ---
     @PostMapping("/students/excel")
-    public ResponseEntity<?> uploadAndParseStudentsExcel(@RequestParam("file") MultipartFile excelFile) {
+    public ResponseEntity<?> uploadAndParseStudentsExcel(@RequestPart("file") MultipartFile excelFile) {
         if (excelFile.isEmpty()) {
             return ResponseEntity.badRequest().body("Please select an Excel file for students.");
         }
@@ -86,7 +82,7 @@ public class ImportController {
 
         try {
             log.info("Received file for student import: {}", excelFile.getOriginalFilename());
-            List<StudentDTO> parsedStudents = importService.parseStudentsFromExcel(excelFile); // Gọi phương thức mới
+            List<StudentParsedResponse> parsedStudents = importService.parseStudentsFromExcel(excelFile); // Gọi phương thức mới
 
             if (parsedStudents.isEmpty()) {
                 log.info("No students were parsed from the file: {}", excelFile.getOriginalFilename());
