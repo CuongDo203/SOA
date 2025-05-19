@@ -36,5 +36,9 @@ public class QuizConfigRequest {
         return this.maxScore;
     }
 
+    public Integer getQuestionCount(){
+        return this.questionCount;
+    }
+
     // public 
 }
