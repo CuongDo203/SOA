@@ -8,34 +8,35 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="eureka-server" />
+        <module name="gateway" />
         <module name="import-service" />
       </profile>
-      <profile name="Annotation profile for student-service" enabled="true">
+      <profile name="Annotation profile for quiz-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
         </processorPath>
+        <module name="quiz-service" />
         <module name="student-service" />
         <module name="question-service" />
-        <module name="notification-service" />
         <module name="quiz-config" />
+        <module name="notification-service" />
         <module name="quiz-creation-service" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="gateway" target="17" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="eureka-server" options="-parameters" />
+      <module name="gateway" options="-parameters" />
       <module name="import-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="question-service" options="-parameters" />
       <module name="quiz-config" options="-parameters" />
       <module name="quiz-creation-service" options="-parameters" />
+      <module name="quiz-service" options="-parameters" />
       <module name="student-service" options="-parameters" />
     </option>
   </component>

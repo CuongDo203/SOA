@@ -3,10 +3,7 @@ package com.microservice.quiz_creation_service.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microservice.event.dto.SendQuizCodeEvent;
 import com.microservice.quiz_creation_service.dto.request.CreateQuizRequest;
-import com.microservice.quiz_creation_service.dto.response.ApiResponse;
-import com.microservice.quiz_creation_service.dto.response.CreateProcessResponse;
-import com.microservice.quiz_creation_service.dto.response.CreateQuizResponse;
-import com.microservice.quiz_creation_service.dto.response.ProcessStepResponse;
+import com.microservice.quiz_creation_service.dto.response.*;
 import com.microservice.quiz_creation_service.service.QuizCreationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,7 +30,7 @@ public class QuizCreationController {
     KafkaTemplate<String, Object> kafkaTemplate;
 
     @PostMapping("/start")
-    public ApiResponse startQuizCreationProcess() {
+    public ApiResponse<?> startQuizCreationProcess() {
         CreateProcessResponse response = quizCreationService.startQuizCreationProcess();
         return ApiResponse.builder()
                 .message(response.getMessage())
@@ -54,9 +52,26 @@ public class QuizCreationController {
 //                .build();
 //    }
 
+    @PostMapping("/import-questions")
+    public ApiResponse<?> importQuestionsFromExcel(@RequestPart("file") MultipartFile excelFile) {
+        List<QuestionParsedResponse> response = quizCreationService.importQuestionsFromExcel(excelFile);
+        return ApiResponse.builder()
+                .message("Question imported successfully!")
+                .result(response)
+                .build();
+    }
+
+    @PostMapping("/import-students")
+    public ApiResponse<?> importStudentsFromExcel(@RequestPart("file") MultipartFile excelFile) {
+        List<StudentParsedResponse> response = quizCreationService.importStudentsFromExcel(excelFile);
+        return ApiResponse.builder()
+                .message("Student imported successfully!")
+                .result(response)
+                .build();
+    }
 
     @PostMapping("/create-quiz")
-    public ApiResponse createQuiz(@RequestBody CreateQuizRequest createQuizRequest) {
+    public ApiResponse<?> createQuiz(@RequestBody CreateQuizRequest createQuizRequest) {
 
         CreateQuizResponse response = quizCreationService.createQuiz(createQuizRequest);
         return ApiResponse.builder()

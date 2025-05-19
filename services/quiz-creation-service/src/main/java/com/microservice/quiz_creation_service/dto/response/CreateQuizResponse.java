@@ -14,6 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateQuizResponse {
+    private String id;
+    private String code;
+    private String title;
     private List<String> studentIds;
     private String quizConfigId;
     private List<String> questionIds;

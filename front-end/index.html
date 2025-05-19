@@ -17,10 +17,10 @@
                 <i class="fas fa-chalkboard-teacher me-2"></i>
                 Hệ thống tạo bài thi trắc nghiệm
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            </button> -->
+            <!-- <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#">
@@ -33,7 +33,7 @@
                         </a>
                     </li>
                 </ul>
-            </div>
+            </div> -->
         </div>
     </nav>
 
@@ -103,16 +103,10 @@
                     
                     <form id="configForm">
                         <div class="row mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <div class="mb-3">
                                     <label for="quizTitle" class="form-label">Tiêu đề bài thi <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="quizTitle" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="subjectName" class="form-label">Môn học <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="subjectName" required>
                                 </div>
                             </div>
                         </div>
@@ -126,7 +120,7 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="passingScore" class="form-label">Điểm đạt <span class="text-danger">*</span></label>
+                                    <label for="passingScore" class="form-label">Điểm tối đa <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" id="passingScore" min="1" max="10" required>
                                 </div>
                             </div>
@@ -150,22 +144,6 @@
                                     <label for="endDate" class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
                                     <input type="datetime-local" class="form-control" id="endDate" required>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label d-block">Tùy chọn bổ sung</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="shuffleQuestions">
-                                <label class="form-check-label" for="shuffleQuestions">Xáo trộn câu hỏi</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="shuffleOptions">
-                                <label class="form-check-label" for="shuffleOptions">Xáo trộn lựa chọn</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" id="showResults">
-                                <label class="form-check-label" for="showResults">Hiển thị kết quả ngay</label>
                             </div>
                         </div>
                     </form>

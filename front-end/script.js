@@ -20,15 +20,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Elements for Step 2
     const configForm = document.getElementById('configForm'); // Lấy form cấu hình
     const quizTitleInput = document.getElementById('quizTitle');
-    const subjectNameInput = document.getElementById('subjectName');
     const durationMinutesInput = document.getElementById('durationMinutes');
     const passingScoreInput = document.getElementById('passingScore');
     const questionCountInput = document.getElementById('questionCount'); // Input số lượng câu hỏi cấu hình
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
-    const shuffleQuestionsCheckbox = document.getElementById('shuffleQuestions');
-    const shuffleOptionsCheckbox = document.getElementById('shuffleOptions');
-    const showResultsCheckbox = document.getElementById('showResults');
     const backToStep1Button = document.getElementById('backToStep1');
     const nextToStep3Button = document.getElementById('nextToStep3');
 
@@ -61,11 +57,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (index < stepIndex) {
                 stepElement.classList.add('completed');
                 stepElement.classList.remove('active');
-                stepElement.querySelector('.progress-info').textContent = 'Đã nhập liệu';
+                stepElement.querySelector('.progress-info').textContent = 'Hoàn thành';
             } else if (index === stepIndex) {
                 stepElement.classList.add('active');
                 stepElement.classList.remove('completed');
-                stepElement.querySelector('.progress-info').textContent = 'Đang nhập liệu...';
+                stepElement.querySelector('.progress-info').textContent = 'Đang thực hiện...';
             } else {
                 stepElement.classList.remove('active', 'completed');
                 stepElement.querySelector('.progress-info').textContent = 'Chưa bắt đầu';
@@ -85,8 +81,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('infoQuizTitle').textContent = quizData.config?.title || quizTitleInput.value || '-';
         // Ưu tiên số câu hỏi đã import, sau đó mới đến số cấu hình (nếu chưa có câu hỏi)
         let currentQuestionCount = quizData.questions ? quizData.questions.length : (questionCountInput.value || '-');
-        if (quizData.config && quizData.config.questionCount && (!quizData.questions || parseInt(quizData.config.questionCount) < currentQuestionCount) ) {
-             // Nếu có cấu hình số câu hỏi và nó nhỏ hơn số câu đã import, hiển thị số cấu hình
+        if (quizData.config && quizData.config.questionCount && (!quizData.questions || parseInt(quizData.config.questionCount) < currentQuestionCount)) {
+            // Nếu có cấu hình số câu hỏi và nó nhỏ hơn số câu đã import, hiển thị số cấu hình
             currentQuestionCount = quizData.config.questionCount;
         }
         document.getElementById('infoQuestionCount').textContent = currentQuestionCount;
@@ -123,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const response = await fetch('http://localhost:8082/api/import/questions/excel', { method: 'POST', body: formData });
+            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/import-questions', { method: 'POST', body: formData });
             if (!response.ok) {
                 let errorMsg = `Lỗi từ server: ${response.status} ${response.statusText}`;
                 try { const errorData = await response.json(); errorMsg = errorData.message || errorData.error || JSON.stringify(errorData); }
@@ -131,14 +127,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(errorMsg);
             }
             const questions = await response.json();
-            quizData.questions = questions;
-            if (questions && questions.length > 0) {
+            quizData.questions = questions.result || [];
+            if (questions.result && questions.result.length > 0) {
                 displayQuestionPreview(questions);
                 questionPreviewPanel.classList.remove('hidden');
                 questionUploadArea.classList.add('hidden');
                 nextToStep2Button.disabled = false;
+                
+                // Update progress indicator for step 1
+                const stepElement = document.getElementById('progress-step1');
+                stepElement.classList.add('completed');
+                stepElement.classList.remove('active');
+                stepElement.querySelector('.progress-info').textContent = 'Hoàn thành';
+                
                 // Tự động điền số lượng câu hỏi vào ô cấu hình ở Step 2
-                if (questionCountInput) questionCountInput.value = questions.length;
+                if (questionCountInput) questionCountInput.value = questions.result.length;
             } else if (typeof questions === 'string') {
                 questionPreviewBody.innerHTML = `<tr><td colspan="7">${questions}</td></tr>`;
                 questionPreviewPanel.classList.remove('hidden');
@@ -163,17 +166,25 @@ document.addEventListener('DOMContentLoaded', function () {
             questionFileInput.value = '';
         }
     }
-    function displayQuestionPreview(questions) { /* ... (giữ nguyên) ... */
+    function displayQuestionPreview(questions) {
         questionPreviewBody.innerHTML = '';
-        questions.forEach((q, index) => {
+        // Check if we're getting the wrapper object or direct array
+        const questionData = questions.result || questions;
+
+        if (!questionData || questionData.length === 0) {
+            questionPreviewBody.innerHTML = '<tr><td colspan="7">Không có câu hỏi nào được tìm thấy.</td></tr>';
+            return;
+        }
+
+        questionData.forEach((q, index) => {
             const row = questionPreviewBody.insertRow();
             row.insertCell().textContent = index + 1;
             row.insertCell().textContent = q.content || 'N/A';
-            row.insertCell().textContent = q.ansA || 'N/A';
-            row.insertCell().textContent = q.ansB || 'N/A';
-            row.insertCell().textContent = q.ansC || 'N/A';
-            row.insertCell().textContent = q.ansD || 'N/A';
-            row.insertCell().textContent = q.correctAns || 'N/A';
+            row.insertCell().textContent = q.option_a || 'N/A';
+            row.insertCell().textContent = q.option_b || 'N/A';
+            row.insertCell().textContent = q.option_c || 'N/A';
+            row.insertCell().textContent = q.option_d || 'N/A';
+            row.insertCell().textContent = q.answer_key || 'N/A';
         });
     }
     document.getElementById('downloadSampleQuestions').addEventListener('click', function () { /* ... (giữ nguyên) ... */ alert('Chức năng tải xuống tệp mẫu câu hỏi sẽ được triển khai sau.'); });
@@ -228,21 +239,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             quizData.config = {
                 title: quizTitleInput.value,
-                subject: subjectNameInput.value,
                 duration: durationMinutesInput.value,
                 passingScore: passingScoreInput.value,
                 questionCount: questionCountInput.value, // Đã lấy ở trên và validate
                 startDate: startDateInput.value,
                 endDate: endDateInput.value,
-                shuffleQuestions: shuffleQuestionsCheckbox.checked,
-                shuffleOptions: shuffleOptionsCheckbox.checked,
-                showResults: showResultsCheckbox.checked
             };
             updateQuizInfoPanel();
             showStep(2); // Chuyển sang bước 3 (Import Sinh viên)
         } else {
-            configForm.reportValidity(); // Dòng này sẽ yêu cầu trình duyệt hiển thị lỗi validation
-            // Không cần alert() ở đây nữa, để trình duyệt tự xử lý
+            configForm.reportValidity();
         }
     });
 
@@ -273,35 +279,50 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const response = await fetch('http://localhost:8082/api/import/students/excel', { method: 'POST', body: formData });
+            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/import-students', { method: 'POST', body: formData });
             if (!response.ok) {
-                let errorMsg = `Lỗi từ server khi tải sinh viên: ${response.status} ${response.statusText}`;
-                try { const errorData = await response.json(); errorMsg = errorData.message || errorData.error || JSON.stringify(errorData); } catch (e) { errorMsg = await response.text(); }
+                let errorMsg = `Lỗi từ server: ${response.status} ${response.statusText}`;
+                try { const errorData = await response.json(); errorMsg = errorData.message || errorData.error || JSON.stringify(errorData); }
+                catch (e) { errorMsg = await response.text(); }
                 throw new Error(errorMsg);
             }
-            const students = await response.json();
-            quizData.students = students;
-            if (students && students.length > 0) {
-                displayStudentPreview(students);
+            const data = await response.json();
+            quizData.students = data.result || [];
+
+            if (data.result && data.result.length > 0) {
+                displayStudentPreview(data);
                 studentPreviewPanel.classList.remove('hidden');
                 studentUploadArea.classList.add('hidden');
                 validateAndCreateQuizButton.disabled = false;
                 allDataValidationFeedback.querySelector('.alert').className = 'alert alert-success';
-                allDataValidationMessage.textContent = `Đã tải lên thành công ${students.length} sinh viên.`;
-                studentCountSpan.textContent = students.length; // Cập nhật span ở Step 4
-            } else if (typeof students === 'string') {
-                studentPreviewBody.innerHTML = `<tr><td colspan="5">${students}</td></tr>`;
-                studentPreviewPanel.classList.remove('hidden'); studentUploadArea.classList.add('hidden'); validateAndCreateQuizButton.disabled = true;
+                allDataValidationMessage.textContent = `Đã tải lên thành công ${data.result.length} sinh viên.`;
+                studentCountSpan.textContent = data.result.length; // Cập nhật span ở Step 4
+                
+                // Update progress indicator for step 3
+                const stepElement = document.getElementById('progress-step3');
+                stepElement.classList.add('completed');
+                stepElement.classList.remove('active');
+                stepElement.querySelector('.progress-info').textContent = 'Hoàn thành';
+            } else if (typeof data === 'string') {
+                studentPreviewBody.innerHTML = `<tr><td colspan="5">${data}</td></tr>`;
+                studentPreviewPanel.classList.remove('hidden');
+                studentUploadArea.classList.add('hidden');
+                validateAndCreateQuizButton.disabled = true;
             } else {
                 studentPreviewBody.innerHTML = '<tr><td colspan="5">Không có sinh viên nào được tìm thấy hoặc file trống sau header.</td></tr>';
-                studentPreviewPanel.classList.remove('hidden'); studentUploadArea.classList.add('hidden'); validateAndCreateQuizButton.disabled = true;
+                studentPreviewPanel.classList.remove('hidden');
+                studentUploadArea.classList.add('hidden');
+                validateAndCreateQuizButton.disabled = true;
             }
             updateQuizInfoPanel();
         } catch (error) {
             console.error('Lỗi khi upload hoặc xử lý file sinh viên:', error);
             alert(`Đã xảy ra lỗi khi tải danh sách sinh viên: ${error.message}`);
-            quizData.students = null; validateAndCreateQuizButton.disabled = true;
-            studentUploadArea.classList.remove('hidden'); studentPreviewPanel.classList.add('hidden'); studentPreviewBody.innerHTML = '';
+            quizData.students = null;
+            validateAndCreateQuizButton.disabled = true;
+            studentUploadArea.classList.remove('hidden');
+            studentPreviewPanel.classList.add('hidden');
+            studentPreviewBody.innerHTML = '';
             allDataValidationFeedback.querySelector('.alert').className = 'alert alert-danger';
             allDataValidationMessage.textContent = 'Lỗi khi tải danh sách sinh viên: ' + error.message;
         } finally {
@@ -312,49 +333,104 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function displayStudentPreview(students) {
         studentPreviewBody.innerHTML = ''; // Xóa nội dung preview cũ
-        if (!students || !Array.isArray(students) || students.length === 0) {
+
+        // Check if we're getting the wrapper object or direct array
+        const studentData = students.result || students;
+
+        if (!studentData || !Array.isArray(studentData) || studentData.length === 0) {
             studentPreviewBody.innerHTML = '<tr><td colspan="5">Không có dữ liệu sinh viên để hiển thị.</td></tr>';
             return;
         }
-        students.forEach((s, index) => {
+
+        studentData.forEach((s, index) => {
             const row = studentPreviewBody.insertRow();
-            console.log(`Processing student object for display (index ${index}):`, s); // GIỮ LẠI DÒNG NÀY ĐỂ DEBUG
 
             row.insertCell().textContent = index + 1; // Số thứ tự
-            // SỬA LẠI CÁCH TRUY CẬP THUỘC TÍNH CHO KHỚP VỚI JSON TỪ BACKEND
-            row.insertCell().textContent = s.student_code || 'N/A'; // Sử dụng s.student_code
-            const fullName = `${s.last_name || ''} ${s.first_name || ''}`.trim(); // Sử dụng s.last_name và s.first_name
+            row.insertCell().textContent = s.student_code || 'N/A';
+            const fullName = `${s.last_name || ''} ${s.first_name || ''}`.trim();
             row.insertCell().textContent = fullName || 'N/A';
-            row.insertCell().textContent = s.email || 'N/A';         // s.email vẫn đúng
-            row.insertCell().textContent = s.class_name || 'N/A';   // Sử dụng s.class_name
+            row.insertCell().textContent = s.email || 'N/A';
+            row.insertCell().textContent = s.class_name || 'N/A';
         });
     }
     backToStep2ButtonFromStep3.addEventListener('click', function () { showStep(1); });
     document.getElementById('downloadSampleStudents').addEventListener('click', function () { /* ... (giữ nguyên) ... */
-        const sampleData = [ { 'Mã sinh viên': 'SV001', 'Họ': 'Nguyen Van', 'Tên': 'A', 'Email': 'b21dccn001@example.com', 'Lớp': 'D21CNPM01' }, { 'Mã sinh viên': 'SV002', 'Họ': 'Tran Thi', 'Tên': 'B', 'Email': 'b21dccn002@example.com', 'Lớp': 'D21CNPM01' } ];
+        const sampleData = [{ 'Mã sinh viên': 'SV001', 'Họ': 'Nguyen Van', 'Tên': 'A', 'Email': 'b21dccn001@example.com', 'Lớp': 'D21CNPM01' }, { 'Mã sinh viên': 'SV002', 'Họ': 'Tran Thi', 'Tên': 'B', 'Email': 'b21dccn002@example.com', 'Lớp': 'D21CNPM01' }];
         const ws = XLSX.utils.json_to_sheet(sampleData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Danh sách sinh viên"); XLSX.writeFile(wb, "mau_danh_sach_sinh_vien.xlsx");
     });
-    validateAndCreateQuizButton.addEventListener('click', function () { /* ... (giữ nguyên logic gọi API tạo quiz) ... */
-        if (!quizData.questions || quizData.questions.length === 0) { alert('Thiếu dữ liệu câu hỏi. Vui lòng quay lại bước 1.'); showStep(0); return; }
-        if (!quizData.config) { alert('Thiếu thông tin cấu hình. Vui lòng quay lại bước 2.'); showStep(1); return; }
-        if (!quizData.students || quizData.students.length === 0) { alert('Thiếu dữ liệu sinh viên. Vui lòng tải lên danh sách sinh viên ở bước 3.'); return; }
+    validateAndCreateQuizButton.addEventListener('click', function () {
+        if (!quizData.questions || quizData.questions.length === 0) { 
+            alert('Thiếu dữ liệu câu hỏi. Vui lòng quay lại bước 1.'); 
+            showStep(0); 
+            return; 
+        }
+        
+        if (!quizData.config) { 
+            alert('Thiếu thông tin cấu hình. Vui lòng quay lại bước 2.'); 
+            showStep(1); 
+            return; 
+        }
+        
+        if (!quizData.students || quizData.students.length === 0) { 
+            alert('Thiếu dữ liệu sinh viên. Vui lòng tải lên danh sách sinh viên ở bước 3.'); 
+            return; 
+        }
+        
         allDataValidationFeedback.querySelector('.alert').className = 'alert alert-warning';
-        allDataValidationMessage.textContent = 'Đang gửi dữ liệu tạo bài thi...'; this.disabled = true;
-        const finalQuizData = { quizConfigurationDto: quizData.config, questions: quizData.questions, students: quizData.students };
-        fetch('http://localhost:8083/api/quiz-creation/create-full-quiz', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalQuizData) })
-        .then(response => { if (!response.ok) { return response.json().then(err => { throw new Error(err.message || 'Lỗi từ server tạo bài thi') }); } return response.json(); })
+        allDataValidationMessage.textContent = 'Đang gửi dữ liệu tạo bài thi...'; 
+        this.disabled = true;
+        
+        // Tạo dữ liệu theo định dạng mới yêu cầu
+        const finalQuizData = {
+            quizTitle: quizData.config.title,
+            students: quizData.students,
+            quizConfig: {
+                durationMinutes: parseInt(quizData.config.duration),
+                questionCount: parseInt(quizData.config.questionCount),
+                maxScore: parseInt(quizData.config.passingScore),
+                rules: "",
+                start: quizData.config.startDate,
+                end: quizData.config.endDate
+            },
+            questions: quizData.questions
+        };
+        
+        fetch('http://localhost:8888/api/v1/quiz-creation/create-quiz', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify(finalQuizData) 
+        })
+        .then(response => { 
+            if (!response.ok) { 
+                return response.json().then(err => { 
+                    throw new Error(err.message || 'Lỗi từ server tạo bài thi') 
+                }); 
+            } 
+            return response.json(); 
+        })
         .then(data => {
             allDataValidationFeedback.querySelector('.alert').className = 'alert alert-success';
             allDataValidationMessage.textContent = 'Bài thi đã được tạo thành công!';
             quizCodeDiv.textContent = data.quizCode || 'QZ-DEMO-' + Date.now();
             studentCountSpan.textContent = quizData.students.length;
+            
+            // First navigate to the final step
             showStep(3); // Chuyển sang Step 4: Result
+            
+            // THEN update the progress indicator - do this AFTER showStep
+            const stepElement = document.getElementById('progress-step4');
+            stepElement.classList.add('completed');
+            stepElement.classList.remove('active');
+            stepElement.querySelector('.progress-info').textContent = 'Hoàn thành';
         })
         .catch(error => {
             console.error('Lỗi khi tạo bài thi:', error);
             allDataValidationFeedback.querySelector('.alert').className = 'alert alert-danger';
             allDataValidationMessage.textContent = 'Lỗi khi tạo bài thi: ' + error.message;
-        }).finally(() => { this.disabled = false; });
+        })
+        .finally(() => { 
+            this.disabled = false; 
+        });
     });
     validateAndCreateQuizButton.disabled = true;
 
