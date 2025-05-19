@@ -1,31 +1,29 @@
 package com.example.validation_service.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuestionDto{
 
-    private String id;
+//    private String id;
+    @JsonProperty("content")
     private String content;
+    @JsonProperty("option_a")
     private String optionA;
+    @JsonProperty("option_b")
     private String optionB;
+    @JsonProperty("option_c")
     private String optionC;
+    @JsonProperty("option_d")
     private String optionD;
+    @JsonProperty("answer_key")
     private String answerKey;
 
-    public String getConTent(){
-        return this.content;
-    }
-    public String getOptA(){
-        return this.optionA;
-    }
-    public String getOptB(){
-        return this.optionB;
-    }
-    public String getOptC(){
-        return this.optionC;
-    }
-    public String getOptD(){
-        return this.optionD;
-    }
-    public String getAnswerKey(){
-        return this.answerKey;
-    }
 }

@@ -1,101 +1,57 @@
-# 📊 Microservices System - Analysis and Design
+# SOA Service Modelling for Quiz Creation System
 
-This document outlines the **analysis** and **design** process for your microservices-based system assignment. Use it to explain your thinking and architecture decisions.
-
----
-
-## 1. 🎯 Problem Statement
-
-_Describe the problem your system is solving._
-
-- Who are the users?
-- What are the main goals?
-- What kind of data is processed?
-
-> Example: A course management system that allows students to register for courses and teachers to manage class rosters.
+Tài liệu này trình bày chi tiết mô hình hóa dịch vụ theo kiến trúc hướng dịch vụ (SOA) cho quy trình tạo bài thi trắc nghiệm. Hệ thống cho phép giáo viên import thủ công danh sách câu hỏi, cấu hình bài thi và danh sách sinh viên, đồng thời xác thực các dữ liệu trước khi sinh mã bài quiz và gửi thông báo đến sinh viên.
 
 ---
 
-## 2. 🧩 Identified Microservices
+## Mục lục
 
-List the microservices in your system and their responsibilities.
-
-| Service Name  | Responsibility                                | Tech Stack   |
-|---------------|------------------------------------------------|--------------|
-| service-a     | Handles user authentication and authorization | Python Flask |
-| service-b     | Manages course registration and class data    | Python Flask |
-| gateway       | Routes requests to services                   | Nginx / Flask|
-
----
-
-## 3. 🔄 Service Communication
-
-Describe how your services communicate (e.g., REST APIs, message queue, gRPC).
-
-- Gateway ⇄ service-a (REST)
-- Gateway ⇄ service-b (REST)
-- Internal: service-a ⇄ service-b (optional)
+- [Bước 1: Phân rã quy trình nghiệp vụ](#bước-1-phân-rã-quy-trình-nghiệp-vụ)
+- [Bước 2: Loại bỏ các hành động không tự động](#bước-2-loại-bỏ-các-hành-động-không-tự-động)
+- [Bước 3: Xác định các dịch vụ theo thực thể (Entity Service Candidates)](#bước-3-xác-định-các-dịch-vụ-theo-thực-thể-entity-service-candidates)
+- [Bước 4: Xác định các tài nguyên (Resources)](#bước-4-xác-định-các-tài-nguyên-resources)
+- [Bước 5: Gắn các API và phương thức vào tài nguyên](#bước-5-gắn-các-api-và-phương-thức-vào-tài-nguyên)
+- [Bước 6: Xác định các luồng dịch vụ phối hợp (Composition Flow)](#bước-6-xác-định-các-luồng-dịch-vụ-phối-hợp-composition-flow)
 
 ---
 
-## 4. 🗂️ Data Design
+## Bước 1: Phân rã quy trình nghiệp vụ
 
-Describe how data is structured and stored in each service.
-
-- service-a: User accounts, credentials
-- service-b: Course catalog, registrations
-
-Use diagrams if possible (DB schema, ERD, etc.)
-
----
-
-## 5. 🔐 Security Considerations
-
-- Use JWT for user sessions
-- Validate input on each service
-- Role-based access control for APIs
+1. Khởi tạo quy trình tạo bài thi trắc nghiệm.
+2. Import danh sách câu hỏi.
+3. Xác thực danh sách câu hỏi.
+4. Nếu không hợp lệ → kết thúc và thông báo lỗi.
+5. Import cấu hình bài quiz.
+6. Xác thực cấu hình bài quiz.
+7. Nếu không hợp lệ → kết thúc và thông báo lỗi.
+8. Import danh sách sinh viên.
+9. Xác thực danh sách sinh viên.
+10. Nếu không hợp lệ → kết thúc và thông báo lỗi.
+11. Nếu tất cả hợp lệ → tạo bài quiz, sinh mã và lưu vào hệ thống.
+12. Gửi mã bài quiz tới sinh viên.
 
 ---
 
+## Bước 2: Loại bỏ các hành động không tự động
 
-## 6. 📦 Deployment Plan
+Các hành động thực hiện thủ công bởi giáo viên không được tự động hóa:
 
-- Use `docker-compose` to manage local environment
-- Each service has its own Dockerfile
-- Environment config stored in `.env` file
+- Giáo viên nhập thủ công danh sách câu hỏi, cấu hình và danh sách sinh viên.
 
----
+- Sinh viên nhận mã và làm bài sau đó (ngoài phạm vi tạo quiz)
 
-## 7. 🎨 Architecture Diagram
+## Bước 3: Xác định các ứng viên dịch vụ thực thể (Entity Service Candidates)
 
-> *(You can add an image or ASCII diagram below)*
+### Non-Agnostic Resources: Micro Service + Task Service 
+- Quiz Creation Service: Điều phối toàn bộ quy trình tạo quiz, kiểm soát luồng xử lý và xác thực.
+- Validation Service: Dịch vụ xác thực chung cho câu hỏi, cấu hình, sinh viên.
+### Agnostic Resources: Utility Service + Entity Service
+- Question Service: Quản lý và xác thực danh sách câu hỏi.
+- Quiz Config Service: Quản lý và xác thực cấu hình quiz.
+- Student Service: Quản lý và xác thực danh sách sinh viên.
+- Quiz Service: Tạo và lưu trữ bài quiz, sinh mã quiz.
+- Import Service: Xử lý việc import dữ liệu đầu vào.
+- Notification Service: Gửi email chứa mã quiz đến sinh viên.
 
-```
-+---------+        +--------------+
-| Gateway | <----> | Service A    |
-|         | <----> | Auth Service |
-+---------+        +--------------+
-       |                ^
-       v                |
-+--------------+   +------------------+
-| Service B    |   | Database / Redis |
-| Course Mgmt  |   +------------------+
-+--------------+
-```
+## Bước 4: Xác định logic cụ thể quy trình
 
----
-
-## ✅ Summary
-
-Summarize why this architecture is suitable for your use case, how it scales, and how it supports independent development and deployment.
-
-
-
-## Author
-
-This template was created by Hung Dang.
-- Email: hungdn@ptit.edu.vn
-- GitHub: hungdn1701
-
-
-Good luck! 💪🚀
