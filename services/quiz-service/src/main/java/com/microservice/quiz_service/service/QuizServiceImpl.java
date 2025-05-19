@@ -56,7 +56,9 @@ public class QuizServiceImpl implements QuizService {
         dto.setId(quiz.getId());
         dto.setCode(quiz.getCode());
         dto.setTitle(quiz.getTitle());
-
+        dto.setQuizConfigId(quiz.getQuizConfigId());
+        dto.setQuestionIds(quiz.getQuestionIds());
+        dto.setStudentIds(quiz.getAssignedStudentIds());
         return dto;
     }
 

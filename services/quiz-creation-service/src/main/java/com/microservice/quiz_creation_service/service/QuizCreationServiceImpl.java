@@ -1,6 +1,7 @@
 package com.microservice.quiz_creation_service.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservice.event.dto.SendQuizCodeEvent;
 import com.microservice.quiz_creation_service.clients.*;
 import com.microservice.quiz_creation_service.dto.request.*;
 import com.microservice.quiz_creation_service.dto.response.*;
@@ -33,7 +34,7 @@ public class QuizCreationServiceImpl implements QuizCreationService{
     QuestionServiceClient questionServiceClient;
     QuizServiceClient quizServiceClient;
 
-    KafkaTemplate<String, Object> kafkaTemplate;
+    KafkaTemplate<String, SendQuizCodeEvent> kafkaTemplate;
 
     @Transactional
     public CreateProcessResponse startQuizCreationProcess() {
@@ -118,6 +119,11 @@ public class QuizCreationServiceImpl implements QuizCreationService{
                 .build();
         response = quizServiceClient.createQuiz(quizDto);
         log.info("Quiz created: {}", response);
+        SendQuizCodeEvent event = new SendQuizCodeEvent();
+        event.setQuizCode(quizCode); // Mã quiz đã được tạo
+        event.setStudentIds(response.getStudentIds());
+        kafkaTemplate.send("quiz-creation-notification-topic", event);
+        log.info("Published quiz creation event for quiz code: {}", quizCode);
         return response;
     }
 }
