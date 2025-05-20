@@ -15,15 +15,12 @@ public class QuizConfigService {
 
     public QuizConfigDTO createQuizConfig(QuizConfigDTO dto) {
         QuizConfig config = QuizConfig.builder()
-                .quizName(dto.getQuizName())
                 .durationMinutes(dto.getDurationMinutes())
                 .questionCount(dto.getQuestionCount())
                 .start(dto.getStart())
                 .end(dto.getEnd())
                 .maxScore(dto.getMaxScore())
                 .rules(dto.getRules())
-                .start(dto.getStart())
-                .end(dto.getEnd())
                 .build();
         config = repository.save(config);
         dto.setId(config.getId());
@@ -34,7 +31,6 @@ public class QuizConfigService {
         return repository.findById(id)
                 .map(config -> QuizConfigDTO.builder()
                         .id(config.getId())
-                        .quizName(config.getQuizName())
                         .durationMinutes(config.getDurationMinutes())
                         .questionCount(config.getQuestionCount())
                         .start(config.getStart())

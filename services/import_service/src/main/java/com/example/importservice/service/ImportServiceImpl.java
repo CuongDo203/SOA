@@ -115,8 +115,6 @@ public class ImportServiceImpl {
         questionParsedResponse.setOptionC(getCellValueAsString(row.getCell(Q_COL_ANS_C), filename, rowNumForLog, "Q_AnsC"));
         questionParsedResponse.setOptionD(getCellValueAsString(row.getCell(Q_COL_ANS_D), filename, rowNumForLog, "Q_AnsD"));
         questionParsedResponse.setAnswerKey(getCellValueAsString(row.getCell(Q_COL_CORRECT_ANS), filename, rowNumForLog, "Q_CorrectAns"));
-        // questionParsedResponse.setSubjectId(getCellValueAsLong(row.getCell(Q_COL_SUBJECT_ID), filename, rowNumForLog, "Q_SubjectId"));
-        // questionParsedResponse.setLevelId(getCellValueAsLong(row.getCell(Q_COL_LEVEL_ID), filename, rowNumForLog, "Q_LevelId"));
         if (questionParsedResponse.getContent() == null || questionParsedResponse.getContent().trim().isEmpty()) {
             log.warn("Question content is empty at row {} in file {}. Skipping this question.", rowNumForLog, filename);
             return null;
@@ -125,7 +123,6 @@ public class ImportServiceImpl {
     }
 
 
-    // --- PHƯƠNG THỨC MỚI ĐỂ PARSE STUDENT EXCEL ---
     public List<StudentParsedResponse> parseStudentsFromExcel(MultipartFile excelFile) throws IOException {
         if (excelFile == null || excelFile.isEmpty()) {
             log.warn("Excel file (students) is null or empty.");
@@ -198,7 +195,6 @@ public class ImportServiceImpl {
         }
 
         StudentParsedResponse studentParsedResponse = new StudentParsedResponse(); // Sử dụng constructor mặc định
-        // Hoặc dùng builder nếu bạn đã thêm @Builder vào StudentParsedResponse
 
         studentParsedResponse.setStudentCode(getCellValueAsString(row.getCell(S_COL_STUDENT_CODE), filename, rowNumForLog, "S_StudentCode"));
         studentParsedResponse.setFirstName(getCellValueAsString(row.getCell(S_COL_FIRST_NAME), filename, rowNumForLog, "S_FirstName"));
@@ -206,23 +202,16 @@ public class ImportServiceImpl {
         studentParsedResponse.setEmail(getCellValueAsString(row.getCell(S_COL_EMAIL), filename, rowNumForLog, "S_Email"));
         studentParsedResponse.setClassName(getCellValueAsString(row.getCell(S_COL_CLASS_NAME), filename, rowNumForLog, "S_ClassName"));
 
-        // Thêm validation cơ bản cho StudentParsedResponse (ví dụ: studentCode không được rỗng)
-        // Bạn đã có @NotBlank trên StudentParsedResponse, nhưng kiểm tra ở đây có thể cho log cụ thể hơn về dòng lỗi.
         if (studentParsedResponse.getStudentCode() == null || studentParsedResponse.getStudentCode().trim().isEmpty()) {
             log.warn("Student code is empty at row {} in file {}. Skipping this student.", rowNumForLog, filename);
             return null; // Hoặc ném lỗi tùy theo yêu cầu
         }
-        // Thêm các validation khác nếu cần (ví dụ: định dạng email,...)
-        // Mặc dù @Email đã có trên DTO, việc kiểm tra ở đây có thể bắt lỗi sớm hơn
-        // hoặc cho phép xử lý tùy chỉnh.
-
+    
         return studentParsedResponse;
     }
 
 
-    // --- CÁC HÀM TIỆN ÍCH (GIỮ NGUYÊN HOẶC CẬP NHẬT) ---
     private String getCellValueAsString(Cell cell, String filename, int rowNum, String columnName) {
-        // ... (giữ nguyên code của bạn) ...
         if (cell == null) {
             log.trace("Cell for {} at row {} in file {} is null.", columnName, rowNum, filename);
             return null;
@@ -234,24 +223,6 @@ public class ImportServiceImpl {
             return null;
         }
         return value;
-    }
-
-    private Long getCellValueAsLong(Cell cell, String filename, int rowNum, String columnName) {
-        // ... (giữ nguyên code của bạn, có thể không cần cho StudentParsedResponse hiện tại) ...
-        String cellValue = getCellValueAsString(cell, filename, rowNum, columnName);
-        if (cellValue == null) {
-            return null;
-        }
-        try {
-            if (cellValue.contains(".")) {
-                cellValue = cellValue.substring(0, cellValue.indexOf('.'));
-            }
-            return Long.parseLong(cellValue);
-        } catch (NumberFormatException e) {
-            log.warn("Cannot parse '{}' as Long for {} at row {} in file {}. Error: {}",
-                    cellValue, columnName, rowNum, filename, e.getMessage());
-            return null;
-        }
     }
 
     // Cập nhật isRowEffectivelyEmpty để nhận cột kiểm tra

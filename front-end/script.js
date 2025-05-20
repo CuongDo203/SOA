@@ -113,31 +113,54 @@ document.addEventListener('DOMContentLoaded', function () {
         if (files.length === 0) { alert('Không có file nào được chọn.'); return; }
         const file = files[0];
         const allowedExtensions = /(\.xlsx|\.xls)$/i;
-        if (!allowedExtensions.exec(file.name)) { alert('Chỉ chấp nhận file .xlsx hoặc .xls.'); questionFileInput.value = ''; return; }
+        if (!allowedExtensions.exec(file.name)) { 
+            alert('Chỉ chấp nhận file .xlsx hoặc .xls.'); 
+            questionFileInput.value = ''; 
+            return; 
+        }
+        
         questionUploadArea.querySelector('h4').textContent = `Đang xử lý: ${file.name}...`;
         const formData = new FormData();
         formData.append('file', file);
+        
         try {
-            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/verify/questions', { method: 'POST', body: formData });
+            const response = await fetch('/api/v1/quiz-creation/verify/questions', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            // Kiểm tra content-type của response
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Nếu không phải JSON, hiển thị nội dung text để debug
+                const textResponse = await response.text();
+                console.error('Response không phải JSON:', textResponse);
+                throw new Error(`Server trả về không phải JSON. Vui lòng kiểm tra kết nối đến server.`);
+            }
+            
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Lỗi từ server:', errorData);
                 
-                // Xử lý hiển thị lỗi chi tiết từ server
+                // Hiển thị lỗi và cho phép người dùng chọn file khác
                 if (errorData.result && Array.isArray(errorData.result) && errorData.result.length > 0) {
-                    // Tạo danh sách lỗi từ mảng errors trong result
                     const errorList = errorData.result.map(err => `• ${err}`).join('\n');
                     const errorMessage = `${errorData.message || 'Lỗi khi xác thực câu hỏi'}:\n\n${errorList}`;
                     alert(errorMessage);
                 } else {
-                    // Fallback nếu không có thông tin lỗi chi tiết
                     alert(`Lỗi khi xác thực câu hỏi: ${errorData.message || 'Vui lòng kiểm tra lại file'}`);
                 }
                 
+                // Hiển thị thông báo lỗi trong bảng xem trước
+                questionPreviewBody.innerHTML = `<tr><td colspan="7" class="text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    File không hợp lệ: ${errorData.message || 'Vui lòng chọn file khác'}
+                </td></tr>`;
+                questionPreviewPanel.classList.remove('hidden');
+                questionUploadArea.classList.add('hidden');
+                
                 quizData.questions = null;
                 nextToStep2Button.disabled = true;
-                questionUploadArea.classList.remove('hidden');
-                questionPreviewPanel.classList.add('hidden');
                 return;
             }
             
@@ -152,13 +175,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 // Tự động điền số lượng câu hỏi vào ô cấu hình ở Step 2
                 if (questionCountInput) questionCountInput.value = questions.result.length;
-            } else if (typeof questions === 'string') {
-                questionPreviewBody.innerHTML = `<tr><td colspan="7">${questions}</td></tr>`;
-                questionPreviewPanel.classList.remove('hidden');
-                questionUploadArea.classList.add('hidden');
-                nextToStep2Button.disabled = true;
             } else {
-                questionPreviewBody.innerHTML = '<tr><td colspan="7">Không có câu hỏi nào được tìm thấy hoặc file trống sau header.</td></tr>';
+                questionPreviewBody.innerHTML = '<tr><td colspan="7" class="text-warning">Không có câu hỏi nào được tìm thấy hoặc file trống.</td></tr>';
                 questionPreviewPanel.classList.remove('hidden');
                 questionUploadArea.classList.add('hidden');
                 nextToStep2Button.disabled = true;
@@ -167,10 +185,17 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error('Lỗi khi upload hoặc xử lý file câu hỏi:', error);
             alert(`Đã xảy ra lỗi khi tải câu hỏi: ${error.message}`);
-            quizData.questions = null; nextToStep2Button.disabled = true;
-            questionUploadArea.classList.remove('hidden');
-            questionPreviewPanel.classList.add('hidden');
-            questionPreviewBody.innerHTML = '';
+            
+            // Hiển thị thông báo lỗi trong bảng xem trước
+            questionPreviewBody.innerHTML = `<tr><td colspan="7" class="text-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Lỗi: ${error.message}
+            </td></tr>`;
+            questionPreviewPanel.classList.remove('hidden');
+            questionUploadArea.classList.add('hidden');
+            
+            quizData.questions = null; 
+            nextToStep2Button.disabled = true;
         } finally {
             questionUploadArea.querySelector('h4').textContent = 'Kéo & Thả tệp hoặc Nhấp để chọn';
             questionFileInput.value = '';
@@ -197,7 +222,9 @@ document.addEventListener('DOMContentLoaded', function () {
             row.insertCell().textContent = q.answer_key || 'N/A';
         });
     }
-    document.getElementById('downloadSampleQuestions').addEventListener('click', function () {  alert('Chức năng tải xuống tệp mẫu câu hỏi sẽ được triển khai sau.'); });
+    document.getElementById('downloadSampleQuestions').removeEventListener('click', function () {
+        alert('Chức năng tải xuống tệp mẫu câu hỏi sẽ được triển khai sau.');
+    });
     nextToStep2Button.addEventListener('click', function () { 
         if (quizData.questions && quizData.questions.length > 0) { showStep(1); }
         else { alert('Vui lòng tải lên danh sách câu hỏi hợp lệ trước khi tiếp tục.'); }
@@ -258,7 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             console.log(configData);
             // Call API to verify configuration
-            fetch('http://localhost:8888/api/v1/quiz-creation/verify/quiz-config', {
+            fetch('/api/v1/quiz-creation/verify/quiz-config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(configData)
@@ -331,22 +358,63 @@ document.addEventListener('DOMContentLoaded', function () {
         if (files.length === 0) { alert('Không có file sinh viên nào được chọn.'); return; }
         const file = files[0];
         const allowedStudentExtensions = /(\.xlsx|\.xls|\.csv)$/i;
-        if (!allowedStudentExtensions.exec(file.name)) { alert('Chỉ chấp nhận file .xlsx, .xls hoặc .csv cho danh sách sinh viên.'); studentFileInput.value = ''; return; }
+        if (!allowedStudentExtensions.exec(file.name)) { 
+            alert('Chỉ chấp nhận file .xlsx, .xls hoặc .csv cho danh sách sinh viên.'); 
+            studentFileInput.value = ''; 
+            return; 
+        }
 
         studentUploadArea.querySelector('h4').textContent = `Đang xử lý file sinh viên: ${file.name}...`;
         allDataValidationFeedback.classList.remove('hidden');
         allDataValidationFeedback.querySelector('.alert').className = 'alert alert-info';
         allDataValidationMessage.textContent = 'Đang tải và xử lý file sinh viên...';
+        
         const formData = new FormData();
         formData.append('file', file);
+        
         try {
-            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/verify/students', { method: 'POST', body: formData });
-            if (!response.ok) {
-                let errorMsg = `Lỗi từ server: ${response.status} ${response.statusText}`;
-                try { const errorData = await response.json(); errorMsg = errorData.message || errorData.error || JSON.stringify(errorData); }
-                catch (e) { errorMsg = await response.text(); }
-                throw new Error(errorMsg);
+            const response = await fetch('/api/v1/quiz-creation/verify/students', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
+            // Kiểm tra content-type của response
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                // Nếu không phải JSON, hiển thị nội dung text để debug
+                const textResponse = await response.text();
+                console.error('Response không phải JSON:', textResponse);
+                throw new Error(`Server trả về không phải JSON. Vui lòng kiểm tra kết nối đến server.`);
             }
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Lỗi từ server:', errorData);
+                
+                // Hiển thị lỗi và cho phép người dùng chọn file khác
+                if (errorData.result && Array.isArray(errorData.result) && errorData.result.length > 0) {
+                    const errorList = errorData.result.map(err => `• ${err}`).join('\n');
+                    const errorMessage = `${errorData.message || 'Lỗi khi xác thực sinh viên'}:\n\n${errorList}`;
+                    alert(errorMessage);
+                } else {
+                    alert(`Lỗi khi xác thực sinh viên: ${errorData.message || 'Vui lòng kiểm tra lại file'}`);
+                }
+                
+                // Hiển thị thông báo lỗi trong bảng xem trước
+                studentPreviewBody.innerHTML = `<tr><td colspan="5" class="text-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    File không hợp lệ: ${errorData.message || 'Vui lòng chọn file khác'}
+                </td></tr>`;
+                studentPreviewPanel.classList.remove('hidden');
+                studentUploadArea.classList.add('hidden');
+                
+                quizData.students = null;
+                validateAndCreateQuizButton.disabled = true;
+                allDataValidationFeedback.querySelector('.alert').className = 'alert alert-danger';
+                allDataValidationMessage.textContent = 'Lỗi khi tải danh sách sinh viên: ' + (errorData.message || 'Vui lòng kiểm tra lại file');
+                return;
+            }
+            
             const data = await response.json();
             quizData.students = data.result || [];
 
@@ -357,33 +425,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 validateAndCreateQuizButton.disabled = false;
                 allDataValidationFeedback.querySelector('.alert').className = 'alert alert-success';
                 allDataValidationMessage.textContent = `Đã tải lên thành công ${data.result.length} sinh viên.`;
-                studentCountSpan.textContent = data.result.length; // Cập nhật span ở Step 4
+                studentCountSpan.textContent = data.result.length;
 
                 // Update progress indicator for step 3
                 const stepElement = document.getElementById('progress-step3');
                 stepElement.classList.add('completed');
                 stepElement.classList.remove('active');
                 stepElement.querySelector('.progress-info').textContent = 'Hoàn thành';
-            } else if (typeof data === 'string') {
-                studentPreviewBody.innerHTML = `<tr><td colspan="5">${data}</td></tr>`;
-                studentPreviewPanel.classList.remove('hidden');
-                studentUploadArea.classList.add('hidden');
-                validateAndCreateQuizButton.disabled = true;
             } else {
-                studentPreviewBody.innerHTML = '<tr><td colspan="5">Không có sinh viên nào được tìm thấy hoặc file trống sau header.</td></tr>';
+                studentPreviewBody.innerHTML = '<tr><td colspan="5" class="text-warning">Không có sinh viên nào được tìm thấy hoặc file trống.</td></tr>';
                 studentPreviewPanel.classList.remove('hidden');
                 studentUploadArea.classList.add('hidden');
                 validateAndCreateQuizButton.disabled = true;
+                allDataValidationFeedback.querySelector('.alert').className = 'alert alert-warning';
+                allDataValidationMessage.textContent = 'Không tìm thấy dữ liệu sinh viên trong file.';
             }
             updateQuizInfoPanel();
         } catch (error) {
             console.error('Lỗi khi upload hoặc xử lý file sinh viên:', error);
             alert(`Đã xảy ra lỗi khi tải danh sách sinh viên: ${error.message}`);
+            
+            // Hiển thị thông báo lỗi trong bảng xem trước
+            studentPreviewBody.innerHTML = `<tr><td colspan="5" class="text-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Lỗi: ${error.message}
+            </td></tr>`;
+            studentPreviewPanel.classList.remove('hidden');
+            studentUploadArea.classList.add('hidden');
+            
             quizData.students = null;
             validateAndCreateQuizButton.disabled = true;
-            studentUploadArea.classList.remove('hidden');
-            studentPreviewPanel.classList.add('hidden');
-            studentPreviewBody.innerHTML = '';
             allDataValidationFeedback.querySelector('.alert').className = 'alert alert-danger';
             allDataValidationMessage.textContent = 'Lỗi khi tải danh sách sinh viên: ' + error.message;
         } finally {
@@ -415,9 +486,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     backToStep2ButtonFromStep3.addEventListener('click', function () { showStep(1); });
-    document.getElementById('downloadSampleStudents').addEventListener('click', function () { 
-        const sampleData = [{ 'Mã sinh viên': 'SV001', 'Họ': 'Nguyen Van', 'Tên': 'A', 'Email': 'b21dccn001@example.com', 'Lớp': 'D21CNPM01' }, { 'Mã sinh viên': 'SV002', 'Họ': 'Tran Thi', 'Tên': 'B', 'Email': 'b21dccn002@example.com', 'Lớp': 'D21CNPM01' }];
-        const ws = XLSX.utils.json_to_sheet(sampleData); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Danh sách sinh viên"); XLSX.writeFile(wb, "mau_danh_sach_sinh_vien.xlsx");
+    document.getElementById('downloadSampleStudents').removeEventListener('click', function () {
+        alert('Chức năng tải xuống tệp mẫu sinh viên sẽ được triển khai sau.');
     });
     validateAndCreateQuizButton.addEventListener('click', function () {
         if (!quizData.questions || quizData.questions.length === 0) {
@@ -456,7 +526,7 @@ document.addEventListener('DOMContentLoaded', function () {
             questions: quizData.questions
         };
 
-        fetch('http://localhost:8888/api/v1/quiz-creation/create-quiz', {
+        fetch('/api/v1/quiz-creation/create-quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalQuizData)

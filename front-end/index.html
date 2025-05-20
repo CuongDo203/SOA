@@ -17,23 +17,6 @@
                 <i class="fas fa-chalkboard-teacher me-2"></i>
                 Hệ thống tạo bài thi trắc nghiệm
             </a>
-            <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button> -->
-            <!-- <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-user me-1"></i> Giáo viên
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-sign-out-alt me-1"></i> Đăng xuất
-                        </a>
-                    </li>
-                </ul>
-            </div> -->
         </div>
     </nav>
 
@@ -58,7 +41,12 @@
                     </div>
                     
                     <div class="preview-panel hidden" id="questionPreviewPanel">
-                        <h5 class="mb-3">Xem trước danh sách câu hỏi</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Xem trước danh sách câu hỏi</h5>
+                            <button class="btn btn-outline-primary btn-sm" id="chooseAnotherQuestionFile">
+                                <i class="fas fa-file-upload me-1"></i>Chọn file khác
+                            </button>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered">
                                 <thead class="table-primary">
@@ -81,9 +69,6 @@
                     
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <button class="btn btn-outline-secondary" id="downloadSampleQuestions">
-                                <i class="fas fa-download me-2"></i>Tải xuống mẫu
-                            </button>
                         </div>
                         <div class="col-md-6 text-end">
                             <button class="btn btn-primary" id="nextToStep2">
@@ -180,7 +165,12 @@
                     </div>
                     
                     <div class="preview-panel hidden" id="studentPreviewPanel">
-                        <h5 class="mb-3">Xem trước danh sách sinh viên</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Xem trước danh sách sinh viên</h5>
+                            <button class="btn btn-outline-primary btn-sm" id="chooseAnotherStudentFile">
+                                <i class="fas fa-file-upload me-1"></i>Chọn file khác
+                            </button>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered">
                                 <thead class="table-primary">
@@ -209,9 +199,7 @@
                     
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <button class="btn btn-outline-secondary" id="downloadSampleStudents">
-                                <i class="fas fa-download me-2"></i>Tải xuống mẫu
-                            </button>
+                            <!-- Nút tải xuống mẫu đã bị xóa -->
                         </div>
                         <div class="col-md-6 text-end">
                             <button class="btn btn-outline-secondary me-2" id="backToStep2">

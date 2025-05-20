@@ -21,7 +21,4 @@ public interface QuizConfigRepository extends JpaRepository<QuizConfig, String> 
     @Query("SELECT q FROM QuizConfig q WHERE q.quizCode IN :quizCodes")
     List<QuizConfig> findByQuizCodes(@Param("quizCodes") Set<String> quizCodes);
 
-    // // Tìm các quiz theo tên gần đúng (LIKE)
-    // @Query("SELECT q FROM QuizConfig q WHERE LOWER(q.quizName) LIKE LOWER(CONCAT('%', :namePart, '%'))")
-    // List<QuizConfig> searchByQuizNameLike(@Param("namePart") String namePart);
 }

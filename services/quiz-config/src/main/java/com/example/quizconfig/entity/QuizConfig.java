@@ -14,12 +14,10 @@ public class QuizConfig {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private String quizName;
     private Integer durationMinutes; // Thời gian làm bài (phút)
     private Integer questionCount;   // Số lượng câu hỏi
     private Double maxScore;         // Điểm tối đa
     private String rules;            // Quy định khác (nếu có)
-    private String quizCode;         // Mã quiz (để phân biệt các quiz khác nhau)
 
     private LocalDateTime start;
     private LocalDateTime end;

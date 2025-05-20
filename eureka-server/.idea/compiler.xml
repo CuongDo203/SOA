@@ -11,7 +11,7 @@
         <module name="gateway" />
         <module name="import-service" />
       </profile>
-      <profile name="Annotation profile for quiz-creation-service" enabled="true">
+      <profile name="Annotation profile for student-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -22,8 +22,8 @@
         <module name="question-service" />
         <module name="quiz-config" />
         <module name="quiz-creation-service" />
-        <module name="quiz-service" />
         <module name="student-service" />
+        <module name="quiz-service" />
         <module name="notification-service" />
       </profile>
     </annotationProcessing>

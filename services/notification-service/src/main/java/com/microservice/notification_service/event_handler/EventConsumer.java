@@ -11,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
+import org.springframework.kafka.retrytopic.DltStrategy;
+import org.springframework.retry.RetryException;
+import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,6 +28,13 @@ public class EventConsumer {
     EmailService emailService;
     StudentServiceClient studentServiceClient;
 
+    @RetryableTopic(
+            attempts = "4",
+            backoff = @Backoff(delay = 1000, multiplier = 2),
+            autoCreateTopics = "true",
+            dltStrategy = DltStrategy.FAIL_ON_ERROR,
+            include = {RetryException.class, RuntimeException.class}
+    )
     @KafkaListener(topics = "quiz-creation-notification-topic", groupId = "notification-group")
     public void handleQuizCreationEvent(SendQuizCodeEvent event) {
         log.info("Received quiz creation event for quiz code: {}", event.getQuizCode());
