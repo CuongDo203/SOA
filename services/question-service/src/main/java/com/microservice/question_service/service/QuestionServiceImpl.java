@@ -33,30 +33,7 @@ public class QuestionServiceImpl implements QuestionService{
         Question savedQuestion = questionRepository.save(question);
         return mapToQuestionResponse(savedQuestion);
     }
-
-    @Override
-    public QuestionResponse getQuestionById(String id) {
-        Question question = questionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.QUESTION_NOT_FOUND));
-        return mapToQuestionResponse(question);
-    }
-
-    @Override
-    public List<QuestionResponse> getQuestionsByIds(List<String> ids) {
-        List<Question> questions = questionRepository.findAllById(ids);
-        return questions.stream()
-                .map(this::mapToQuestionResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<QuestionResponse> getAllQuestions() {
-        List<Question> questions = questionRepository.findAll();
-        return questions.stream()
-                .map(this::mapToQuestionResponse)
-                .collect(Collectors.toList());
-    }
-
+    
     private QuestionResponse mapToQuestionResponse(Question question) {
         return QuestionResponse.builder()
                 .id(question.getId())

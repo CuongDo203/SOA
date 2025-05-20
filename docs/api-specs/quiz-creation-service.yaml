@@ -1,0 +1,425 @@
+openapi: 3.0.0
+info:
+  title: Quiz Creation Service API
+  description: Service for creating quizzes by orchestrating multiple microservices
+  version: 1.0.0
+  contact:
+    name: Development Team
+servers:
+  - url: http://localhost:9000/api/v1/quiz-creation
+    description: Local development server
+tags:
+  - name: Quiz Creation
+    description: Operations for creating and managing quizzes
+
+paths:
+  /verify/questions:
+    post:
+      summary: Verify question data from Excel
+      description: Import and validate questions from an Excel file
+      operationId: verifyQuestionData
+      tags:
+        - Quiz Creation
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Excel file containing question data
+      responses:
+        '200':
+          description: Questions imported and validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionImportResponse'
+        '400':
+          description: Bad request - invalid file or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /verify/students:
+    post:
+      summary: Verify student data from Excel
+      description: Import and validate students from an Excel file
+      operationId: verifyStudentData
+      tags:
+        - Quiz Creation
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Excel file containing student data
+      responses:
+        '200':
+          description: Students imported and validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentImportResponse'
+        '400':
+          description: Bad request - invalid file or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /verify/quiz-config:
+    post:
+      summary: Verify quiz configuration
+      description: Validate quiz configuration settings
+      operationId: verifyQuizConfig
+      tags:
+        - Quiz Creation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizConfigDTO'
+      responses:
+        '200':
+          description: Quiz configuration validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizConfigValidationResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /create-quiz:
+    post:
+      summary: Create a complete quiz
+      description: Create a quiz with questions, students, and configuration
+      operationId: createQuiz
+      tags:
+        - Quiz Creation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuizRequest'
+      responses:
+        '200':
+          description: Quiz created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateQuizResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    QuizConfigDTO:
+      type: object
+      description: Quiz configuration settings
+      required:
+        - durationMinutes
+        - questionCount
+        - maxScore
+        - start
+        - end
+      properties:
+        durationMinutes:
+          type: integer
+          description: Duration of the quiz in minutes
+          example: 60
+          minimum: 1
+        questionCount:
+          type: integer
+          description: Number of questions in the quiz
+          example: 20
+          minimum: 1
+        maxScore:
+          type: number
+          format: double
+          description: Maximum score possible for the quiz
+          example: 100.0
+          minimum: 0
+        rules:
+          type: string
+          description: Additional rules for the quiz (optional)
+          example: "No calculators allowed"
+        start:
+          type: string
+          format: date-time
+          description: Start time of the quiz availability
+          example: "2023-06-15T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: End time of the quiz availability
+          example: "2023-06-15T11:00:00Z"
+
+    CreateQuestionRequest:
+      type: object
+      description: Question data for creating a quiz
+      required:
+        - content
+        - optionA
+        - optionB
+        - optionC
+        - optionD
+        - answerKey
+      properties:
+        content:
+          type: string
+          description: The text of the question
+          example: "What is the capital of France?"
+        optionA:
+          type: string
+          description: First answer option
+          example: "London"
+        optionB:
+          type: string
+          description: Second answer option
+          example: "Berlin"
+        optionC:
+          type: string
+          description: Third answer option
+          example: "Paris"
+        optionD:
+          type: string
+          description: Fourth answer option
+          example: "Madrid"
+        answerKey:
+          type: string
+          description: The correct answer (A, B, C, or D)
+          example: "C"
+          enum: ["A", "B", "C", "D"]
+
+    StudentCreationRequest:
+      type: object
+      description: Student data for creating a quiz
+      required:
+        - fullName
+        - email
+        - studentId
+      properties:
+        fullName:
+          type: string
+          description: Full name of the student
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the student
+          example: "john.doe@example.com"
+        studentId:
+          type: string
+          description: Student ID or registration number
+          example: "S12345"
+        phoneNumber:
+          type: string
+          description: Phone number of the student (optional)
+          example: "+1234567890"
+
+    CreateQuizRequest:
+      type: object
+      description: Request to create a complete quiz
+      required:
+        - quizTitle
+        - students
+        - quizConfig
+        - questions
+      properties:
+        quizTitle:
+          type: string
+          description: Title of the quiz
+          example: "Midterm Exam - Computer Science 101"
+        students:
+          type: array
+          description: List of students to assign to the quiz
+          items:
+            $ref: '#/components/schemas/StudentCreationRequest'
+        quizConfig:
+          $ref: '#/components/schemas/QuizConfigDTO'
+        questions:
+          type: array
+          description: List of questions for the quiz
+          items:
+            $ref: '#/components/schemas/CreateQuestionRequest'
+
+    QuestionParsedResponse:
+      type: object
+      description: Parsed question data from Excel
+      properties:
+        content:
+          type: string
+          description: The text of the question
+          example: "What is the capital of France?"
+        option_a:
+          type: string
+          description: First answer option
+          example: "London"
+        option_b:
+          type: string
+          description: Second answer option
+          example: "Berlin"
+        option_c:
+          type: string
+          description: Third answer option
+          example: "Paris"
+        option_d:
+          type: string
+          description: Fourth answer option
+          example: "Madrid"
+        answer_key:
+          type: string
+          description: The correct answer (A, B, C, or D)
+          example: "C"
+
+    StudentParsedResponse:
+      type: object
+      description: Parsed student data from Excel
+      properties:
+        fullName:
+          type: string
+          description: Full name of the student
+          example: "John Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the student
+          example: "john.doe@example.com"
+        studentId:
+          type: string
+          description: Student ID or registration number
+          example: "S12345"
+        phoneNumber:
+          type: string
+          description: Phone number of the student
+          example: "+1234567890"
+
+    QuizParsedResponse:
+      type: object
+      description: Validated quiz configuration
+      properties:
+        durationMinutes:
+          type: integer
+          description: Duration of the quiz in minutes
+          example: 60
+        questionCount:
+          type: integer
+          description: Number of questions in the quiz
+          example: 20
+        maxScore:
+          type: number
+          format: double
+          description: Maximum score possible for the quiz
+          example: 100.0
+        rules:
+          type: string
+          description: Additional rules for the quiz
+          example: "No calculators allowed"
+        start:
+          type: string
+          format: date-time
+          description: Start time of the quiz availability
+          example: "2023-06-15T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: End time of the quiz availability
+          example: "2023-06-15T11:00:00Z"
+
+    CreateQuizResponse:
+      type: object
+      description: Response after creating a quiz
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the created quiz
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        code:
+          type: string
+          description: Unique code for accessing the quiz
+          example: "QUIZ123"
+        title:
+          type: string
+          description: Title of the quiz
+          example: "Midterm Exam - Computer Science 101"
+        studentIds:
+          type: array
+          description: List of student IDs assigned to the quiz
+          items:
+            type: string
+          example: ["5f8d0a1b2c3d4e5f6a7b8c9d", "5f8d0a1b2c3d4e5f6a7b8c9e"]
+        quizConfigId:
+          type: string
+          description: ID of the quiz configuration
+          example: "5f8d0a1b2c3d4e5f6a7b8c9f"
+        questionIds:
+          type: array
+          description: List of question IDs in the quiz
+          items:
+            type: string
+          example: ["5f8d0a1b2c3d4e5f6a7b8c9g", "5f8d0a1b2c3d4e5f6a7b8c9h"]
+
+    ApiResponse:
+      type: object
+      description: Standard API response wrapper
+      properties:
+        code:
+          type: integer
+          description: Status code (1000 = Success)
+          example: 1000
+          default: 1000
+        message:
+          type: string
+          description: Response message
+          example: "Operation completed successfully!"
+        result:
+          type: object
+          description: Response data (varies by endpoint)

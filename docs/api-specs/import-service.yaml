@@ -1,0 +1,163 @@
+openapi: 3.0.0
+info:
+  title: Import Service API
+  description: Service for importing and parsing data from Excel files
+  version: 1.0.0
+  contact:
+    name: Development Team
+servers:
+  - url: http://localhost:8082/api/v1/import
+    description: Local development server
+tags:
+  - name: Import
+    description: Operations for importing data from files
+
+paths:
+  /questions/excel:
+    post:
+      summary: Import questions from Excel file
+      description: Parse and extract question data from an Excel file
+      operationId: importQuestionsFromExcel
+      tags:
+        - Import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Excel file (.xls or .xlsx) containing question data
+      responses:
+        '200':
+          description: Questions successfully parsed from Excel file
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionParsedResponse'
+        '400':
+          description: Bad request - empty file, invalid file type, or parsing error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Please select an Excel file for questions."
+        '500':
+          description: Internal server error during file processing
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Error processing the question Excel file: [error details]"
+
+  /students/excel:
+    post:
+      summary: Import students from Excel file
+      description: Parse and extract student data from an Excel or CSV file
+      operationId: importStudentsFromExcel
+      tags:
+        - Import
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Excel file (.xls, .xlsx) or CSV file containing student data
+      responses:
+        '200':
+          description: Students successfully parsed from file
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StudentParsedResponse'
+        '400':
+          description: Bad request - empty file, invalid file type, or parsing error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Please select an Excel file for students."
+        '500':
+          description: Internal server error during file processing
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Error processing the student Excel file: [error details]"
+
+components:
+  schemas:
+    QuestionParsedResponse:
+      type: object
+      description: Represents a question parsed from an Excel file
+      required:
+        - content
+        - option_a
+        - option_b
+        - option_c
+        - option_d
+        - answer_key
+      properties:
+        content:
+          type: string
+          description: The text of the question
+          example: "What is the capital of France?"
+        option_a:
+          type: string
+          description: First answer option
+          example: "London"
+        option_b:
+          type: string
+          description: Second answer option
+          example: "Berlin"
+        option_c:
+          type: string
+          description: Third answer option
+          example: "Paris"
+        option_d:
+          type: string
+          description: Fourth answer option
+          example: "Madrid"
+        answer_key:
+          type: string
+          description: The correct answer (A, B, C, or D)
+          example: "C"
+          enum: ["A", "B", "C", "D"]
+
+    StudentParsedResponse:
+      type: object
+      description: Represents a student parsed from an Excel or CSV file
+      required:
+        - studentId
+        - name
+        - email
+      properties:
+        studentId:
+          type: string
+          description: Unique identifier for the student
+          example: "B20DCCN001"
+        name:
+          type: string
+          description: Full name of the student
+          example: "Nguyen Van A"
+        email:
+          type: string
+          format: email
+          description: Email address of the student
+          example: "student@example.com"

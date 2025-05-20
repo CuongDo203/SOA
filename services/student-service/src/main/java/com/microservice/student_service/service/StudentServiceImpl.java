@@ -29,7 +29,7 @@ public class StudentServiceImpl implements StudentService{
 
     @Transactional
     @Override
-    public StudentResponse creatStudent(StudentCreationRequest studentCreationRequest) {
+    public StudentResponse createStudent(StudentCreationRequest studentCreationRequest) {
         if (studentRepository.existsByStudentCode(studentCreationRequest.getStudentCode())) {
             log.warn("Student code {} already exist", studentCreationRequest.getStudentCode());
             throw new DataConflictException(ErrorCode.STUDENT_EXISTED);
@@ -45,37 +45,6 @@ public class StudentServiceImpl implements StudentService{
         StudentResponse response = new StudentResponse();
         BeanUtils.copyProperties(savedStudent, response);
         return response;
-    }
-
-    public StudentResponse getStudentById(String id) {
-        Student student = studentRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException(ErrorCode.STUDENT_NOT_FOUND)
-        );
-        StudentResponse response = new StudentResponse();
-        BeanUtils.copyProperties(student, response);
-        return response;
-    }
-
-    @Override
-    public StudentResponse getStudentByCode(String studentCode) {
-        Student student = studentRepository.findByStudentCode(studentCode)
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.STUDENT_NOT_FOUND));
-        //Test publish message to kafka
-        StudentResponse response = new StudentResponse();
-        BeanUtils.copyProperties(student, response);
-        return response;
-    }
-
-    @Override
-    public List<StudentResponse> getAllStudents() {
-        List<Student> students = studentRepository.findAll();
-        List<StudentResponse> studentResponses = new ArrayList<>();
-        students.forEach(student -> {
-            StudentResponse studentResponse = new StudentResponse();
-            BeanUtils.copyProperties(student, studentResponse);
-            studentResponses.add(studentResponse);
-        });
-        return studentResponses;
     }
 
     @Override

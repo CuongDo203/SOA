@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  title: Question Service API
+  description: Service for managing quiz questions
+  version: 1.0.0
+  contact:
+    name: Development Team
+servers:
+  - url: http://localhost:9004/api/v1/questions
+    description: Local development server
+tags:
+  - name: Questions
+    description: Operations for managing quiz questions
+
+paths:
+  /:
+    post:
+      summary: Create a new question
+      description: Creates a new question with multiple choice options
+      operationId: createQuestion
+      tags:
+        - Questions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionRequest'
+      responses:
+        '200':
+          description: Question created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Validation failed"
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                      example: "QUESTION_NOT_NULL"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "An unexpected error occurred"
+
+components:
+  schemas:
+    CreateQuestionRequest:
+      type: object
+      description: Request object for creating a new question
+      required:
+        - content
+        - optionA
+        - optionB
+        - optionC
+        - optionD
+        - answerKey
+      properties:
+        content:
+          type: string
+          description: The text of the question
+          example: "What is the capital of France?"
+        optionA:
+          type: string
+          description: First answer option
+          example: "London"
+        optionB:
+          type: string
+          description: Second answer option
+          example: "Berlin"
+        optionC:
+          type: string
+          description: Third answer option
+          example: "Paris"
+        optionD:
+          type: string
+          description: Fourth answer option
+          example: "Madrid"
+        answerKey:
+          type: string
+          description: The correct answer (A, B, C, or D)
+          example: "C"
+          enum: ["A", "B", "C", "D"]
+
+    QuestionResponse:
+      type: object
+      description: Response object containing question details
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the question
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        content:
+          type: string
+          description: The text of the question
+          example: "What is the capital of France?"
+        optionA:
+          type: string
+          description: First answer option
+          example: "London"
+        optionB:
+          type: string
+          description: Second answer option
+          example: "Berlin"
+        optionC:
+          type: string
+          description: Third answer option
+          example: "Paris"
+        optionD:
+          type: string
+          description: Fourth answer option
+          example: "Madrid"
+        answerKey:
+          type: string
+          description: The correct answer (A, B, C, or D)
+          example: "C"
+
+    ApiResponse:
+      type: object
+      description: Standard API response wrapper
+      properties:
+        code:
+          type: integer
+          description: Status code (1000 = Success)
+          example: 1000
+          default: 1000
+        message:
+          type: string
+          description: Response message
+          example: "Create question successfully!"
+        result:
+          $ref: '#/components/schemas/QuestionResponse'

@@ -26,30 +26,4 @@ public class QuestionController {
                 .build();
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<?> getQuestionById(@PathVariable String id) {
-        QuestionResponse questionResponse = questionService.getQuestionById(id);
-        return ApiResponse.<QuestionResponse>builder()
-                .message("Get question successfully!")
-                .result(questionResponse)
-                .build();
-    }
-
-    @PostMapping("/by-ids")
-    public ApiResponse<?> getQuestionsByIds(@RequestBody List<String> ids) {
-        List<QuestionResponse> responses = questionService.getQuestionsByIds(ids);
-        return ApiResponse.builder()
-                .message("Get questions by ids successfully!")
-                .result(responses)
-                .build();
-    }
-
-    @GetMapping
-    public ApiResponse<List<QuestionResponse>> getAllQuestions() {
-        List<QuestionResponse> questions = questionService.getAllQuestions();
-        return ApiResponse.<List<QuestionResponse>>builder()
-                .message("Get all questions successfully!")
-                .result(questions)
-                .build();
-    }
 }

@@ -17,10 +17,4 @@ public class QuizConfigController {
         return ResponseEntity.ok(service.createQuizConfig(dto));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<QuizConfigDTO> get(@PathVariable String id) {
-        return service.getQuizConfig(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
 }

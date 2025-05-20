@@ -10,10 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 public interface StudentService {
-    StudentResponse creatStudent(StudentCreationRequest studentCreationRequest);
-    StudentResponse getStudentById(String id);
-    StudentResponse getStudentByCode(String studentCode);
-    List<StudentResponse> getAllStudents();
+    StudentResponse createStudent(StudentCreationRequest studentCreationRequest);
     StudentCheckResponse checkStudentExistence(List<StudentCheckRequest> students);
     List<StudentResponse> getStudentsByIds(List<String> ids);
 }

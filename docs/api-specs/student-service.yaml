@@ -1,0 +1,264 @@
+openapi: 3.0.0
+info:
+  title: Student Service API
+  description: Service for managing students in the microservice architecture
+  version: 1.0.0
+  contact:
+    name: Development Team
+servers:
+  - url: http://localhost:9001/api/v1
+    description: Local development server
+tags:
+  - name: Students
+    description: Operations for managing students
+
+paths:
+  /students:
+    post:
+      summary: Create a new student
+      description: Creates a new student with the provided information
+      operationId: createStudent
+      tags:
+        - Students
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentCreationRequest'
+      responses:
+        '200':
+          description: Student created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /students/check-existence:
+    post:
+      summary: Check student existence
+      description: Checks if students with the provided information exist in the system
+      operationId: checkStudentExistence
+      tags:
+        - Students
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ListStudentCheckRequest'
+      responses:
+        '200':
+          description: Student existence check completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /students/by-ids:
+    post:
+      summary: Get students by IDs
+      description: Retrieves students by their unique identifiers
+      operationId: getStudentsByIds
+      tags:
+        - Students
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentIdsRequest'
+      responses:
+        '200':
+          description: Students retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    StudentCreationRequest:
+      type: object
+      description: Data for creating a new student
+      required:
+        - student_code
+        - first_name
+        - last_name
+      properties:
+        student_code:
+          type: string
+          description: Unique student code/ID
+          example: "B20DCCN001"
+          pattern: "^[BE]\\d{2}DCCN\\d{3}$"
+        first_name:
+          type: string
+          description: First name of the student
+          example: "John"
+        last_name:
+          type: string
+          description: Last name of the student
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the student
+          example: "john.doe@example.com"
+        class_name:
+          type: string
+          description: Class name of the student
+          example: "D20CQCN01-B"
+
+    StudentResponse:
+      type: object
+      description: Student information
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the student
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        studentCode:
+          type: string
+          description: Unique student code/ID
+          example: "B20DCCN001"
+        firstName:
+          type: string
+          description: First name of the student
+          example: "John"
+        lastName:
+          type: string
+          description: Last name of the student
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the student
+          example: "john.doe@example.com"
+        className:
+          type: string
+          description: Class name of the student
+          example: "D20CQCN01-B"
+
+    StudentCheckRequest:
+      type: object
+      description: Request to check if a student exists
+      required:
+        - studentCode
+      properties:
+        studentCode:
+          type: string
+          description: Unique student code/ID to check
+          example: "B20DCCN001"
+        email:
+          type: string
+          format: email
+          description: Email address to check
+          example: "john.doe@example.com"
+
+    ListStudentCheckRequest:
+      type: object
+      description: Request to check multiple students
+      required:
+        - studentChecks
+      properties:
+        studentChecks:
+          type: array
+          description: List of student checks
+          items:
+            $ref: '#/components/schemas/StudentCheckRequest'
+
+    StudentCheckResponse:
+      type: object
+      description: Response for student existence check
+      properties:
+        existingStudentCodes:
+          type: array
+          description: List of existing student codes
+          items:
+            type: string
+          example: ["B20DCCN001", "B20DCCN002"]
+        nonExistingStudentCodes:
+          type: array
+          description: List of non-existing student codes
+          items:
+            type: string
+          example: ["B20DCCN003", "B20DCCN004"]
+        existingEmails:
+          type: array
+          description: List of existing emails
+          items:
+            type: string
+          example: ["john.doe@example.com"]
+        nonExistingEmails:
+          type: array
+          description: List of non-existing emails
+          items:
+            type: string
+          example: ["jane.doe@example.com"]
+
+    StudentIdsRequest:
+      type: object
+      description: Request to get students by their IDs
+      required:
+        - ids
+      properties:
+        ids:
+          type: array
+          description: List of student IDs
+          items:
+            type: string
+          example: ["123e4567-e89b-12d3-a456-426614174000", "223e4567-e89b-12d3-a456-426614174000"]
+
+    ApiResponse:
+      type: object
+      description: Standard API response wrapper
+      properties:
+        code:
+          type: integer
+          description: Status code (1000 = Success)
+          example: 1000
+          default: 1000
+        message:
+          type: string
+          description: Response message
+          example: "Operation completed successfully!"
+        result:
+          type: object
+          description: Response data (varies by endpoint)
+

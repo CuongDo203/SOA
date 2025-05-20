@@ -1,0 +1,272 @@
+openapi: 3.0.0
+info:
+  title: Validation Service API
+  description: Service for validating data in the microservice architecture
+  version: 1.0.0
+  contact:
+    name: Development Team
+servers:
+  - url: http://localhost:8091/api/v1/validation
+    description: Local development server
+tags:
+  - name: Validation
+    description: Operations for validating different types of data
+
+paths:
+  /questions:
+    post:
+      summary: Validate questions
+      description: Validates a list of questions for correctness and completeness
+      operationId: validateQuestions
+      tags:
+        - Validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionListRequest'
+      responses:
+        '200':
+          description: Questions validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /quiz-config:
+    post:
+      summary: Validate quiz configuration
+      description: Validates quiz configuration settings for correctness and completeness
+      operationId: validateQuizConfig
+      tags:
+        - Validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizConfigDTO'
+      responses:
+        '200':
+          description: Quiz configuration validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /students:
+    post:
+      summary: Validate students
+      description: Validates a list of students for correctness and completeness
+      operationId: validateStudents
+      tags:
+        - Validation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentListRequest'
+      responses:
+        '200':
+          description: Students validated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '400':
+          description: Bad request - invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    QuestionListRequest:
+      type: object
+      description: Request containing a list of questions to validate
+      required:
+        - questions
+      properties:
+        questions:
+          type: array
+          description: List of questions to validate
+          items:
+            $ref: '#/components/schemas/QuestionDTO'
+
+    QuestionDTO:
+      type: object
+      description: Question data for validation
+      required:
+        - content
+        - optionA
+        - optionB
+        - optionC
+        - optionD
+        - answerKey
+      properties:
+        content:
+          type: string
+          description: The text of the question
+          example: "What is the capital of France?"
+        optionA:
+          type: string
+          description: First answer option
+          example: "London"
+        optionB:
+          type: string
+          description: Second answer option
+          example: "Berlin"
+        optionC:
+          type: string
+          description: Third answer option
+          example: "Paris"
+        optionD:
+          type: string
+          description: Fourth answer option
+          example: "Madrid"
+        answerKey:
+          type: string
+          description: The correct answer (A, B, C, or D)
+          example: "C"
+          enum: ["A", "B", "C", "D"]
+
+    QuizConfigDTO:
+      type: object
+      description: Quiz configuration settings for validation
+      required:
+        - durationMinutes
+        - questionCount
+        - maxScore
+        - start
+        - end
+      properties:
+        durationMinutes:
+          type: integer
+          description: Duration of the quiz in minutes
+          example: 60
+          minimum: 1
+        questionCount:
+          type: integer
+          description: Number of questions in the quiz
+          example: 20
+          minimum: 1
+        maxScore:
+          type: number
+          format: double
+          description: Maximum score possible for the quiz
+          example: 100.0
+          minimum: 0
+        rules:
+          type: string
+          description: Additional rules for the quiz (optional)
+          example: "No calculators allowed"
+        start:
+          type: string
+          format: date-time
+          description: Start time of the quiz availability
+          example: "2023-06-15T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: End time of the quiz availability
+          example: "2023-06-15T11:00:00Z"
+
+    StudentListRequest:
+      type: object
+      description: Request containing a list of students to validate
+      required:
+        - students
+      properties:
+        students:
+          type: array
+          description: List of students to validate
+          items:
+            $ref: '#/components/schemas/StudentDTO'
+
+    StudentDTO:
+      type: object
+      description: Student data for validation
+      required:
+        - studentCode
+        - firstName
+        - lastName
+      properties:
+        studentCode:
+          type: string
+          description: Unique student code/ID
+          example: "B20DCCN001"
+          pattern: "^[BE]\\d{2}DCCN\\d{3}$"
+        firstName:
+          type: string
+          description: First name of the student
+          example: "John"
+        lastName:
+          type: string
+          description: Last name of the student
+          example: "Doe"
+        email:
+          type: string
+          format: email
+          description: Email address of the student
+          example: "john.doe@example.com"
+        className:
+          type: string
+          description: Class name of the student
+          example: "D20CQCN01-B"
+
+    ValidationResult:
+      type: object
+      description: Result of validation operation
+      properties:
+        valid:
+          type: boolean
+          description: Whether the validation passed
+          example: true
+        errors:
+          type: array
+          description: List of validation errors (if any)
+          items:
+            type: string
+          example: ["Thời lượng phải lớn hơn 0 !", "Điểm của bài thi phải lớn hơn 0 !"]
+        warnings:
+          type: array
+          description: List of validation warnings (if any)
+          items:
+            type: string
+          example: ["Question content is quite short", "Student email format is unusual"]
+        validatedData:
+          type: object
+          description: The validated data (if validation passed)

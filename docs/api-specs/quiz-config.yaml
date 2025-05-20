@@ -1,0 +1,277 @@
+openapi: 3.0.0
+info:
+  title: Quiz Config Service API
+  description: Service for managing quiz configurations in the microservice architecture
+  version: 1.0.0
+  contact:
+    name: Development Team
+servers:
+  - url: http://localhost:8081/api/v1
+    description: Local development server
+tags:
+  - name: Quiz Config
+    description: Operations for managing quiz configurations
+
+paths:
+  /quiz-config:
+    post:
+      summary: Create a new quiz configuration
+      description: Creates a new quiz configuration with duration, question count, and other settings
+      operationId: createQuizConfig
+      tags:
+        - Quiz Config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizConfigRequest'
+      responses:
+        '200':
+          description: Quiz configuration created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizConfigResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    get:
+      summary: Get all quiz configurations
+      description: Retrieves all quiz configurations with optional pagination
+      operationId: getAllQuizConfigs
+      tags:
+        - Quiz Config
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number (zero-based)
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          required: false
+          description: Page size
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Quiz configurations retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedQuizConfigResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /quiz-config/{id}:
+    get:
+      summary: Get quiz configuration by ID
+      description: Retrieves a quiz configuration by its unique identifier
+      operationId: getQuizConfigById
+      tags:
+        - Quiz Config
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the quiz configuration
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quiz configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizConfigResponse'
+        '404':
+          description: Quiz configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      summary: Update quiz configuration
+      description: Updates an existing quiz configuration by its ID
+      operationId: updateQuizConfig
+      tags:
+        - Quiz Config
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the quiz configuration
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizConfigRequest'
+      responses:
+        '200':
+          description: Quiz configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizConfigResponse'
+        '404':
+          description: Quiz configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '400':
+          description: Bad request - validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      summary: Delete quiz configuration
+      description: Deletes a quiz configuration by its ID
+      operationId: deleteQuizConfig
+      tags:
+        - Quiz Config
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Unique identifier of the quiz configuration
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Quiz configuration deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Quiz configuration not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /quiz-config/validate:
+    post:
+      summary: Validate quiz configuration
+      description: Validates a quiz configuration without saving it
+      operationId: validateQuizConfig
+      tags:
+        - Quiz Config
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizConfigRequest'
+      responses:
+        '200':
+          description: Quiz configuration is valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '400':
+          description: Quiz configuration is invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    QuizConfigDTO:
+      type: object
+      description: Data transfer object for quiz configuration
+      required:
+        - durationMinutes
+        - questionCount
+        - maxScore
+        - start
+        - end
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the quiz configuration (null for creation requests)
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        durationMinutes:
+          type: integer
+          description: Duration of the quiz in minutes
+          example: 60
+          minimum: 1
+        questionCount:
+          type: integer
+          description: Number of questions in the quiz
+          example: 20
+          minimum: 1
+        maxScore:
+          type: number
+          format: double
+          description: Maximum score possible for the quiz
+          example: 100.0
+          minimum: 0
+        rules:
+          type: string
+          description: Additional rules for the quiz (optional)
+          example: "No calculators allowed"
+        start:
+          type: string
+          format: date-time
+          description: Start time of the quiz availability
+          example: "2023-06-15T09:00:00Z"
+        end:
+          type: string
+          format: date-time
+          description: End time of the quiz availability
+          example: "2023-06-15T11:00:00Z"

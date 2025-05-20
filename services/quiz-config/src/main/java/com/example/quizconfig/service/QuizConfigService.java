@@ -27,16 +27,4 @@ public class QuizConfigService {
         return dto;
     }
 
-    public Optional<QuizConfigDTO> getQuizConfig(String id) {
-        return repository.findById(id)
-                .map(config -> QuizConfigDTO.builder()
-                        .id(config.getId())
-                        .durationMinutes(config.getDurationMinutes())
-                        .questionCount(config.getQuestionCount())
-                        .start(config.getStart())
-                        .end(config.getEnd())
-                        .maxScore(config.getMaxScore())
-                        .rules(config.getRules())
-                        .build());
-    }
 }

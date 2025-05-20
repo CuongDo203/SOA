@@ -11,14 +11,5 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface QuizConfigRepository extends JpaRepository<QuizConfig, String> {
-    // Tìm quiz config theo mã quiz
-    Optional<QuizConfig> findByQuizCode(String quizCode);
-
-    // Kiểm tra tồn tại quiz config theo mã quiz
-    boolean existsByQuizCode(String quizCode);
-
-    // Tìm danh sách quiz config theo danh sách mã quiz
-    @Query("SELECT q FROM QuizConfig q WHERE q.quizCode IN :quizCodes")
-    List<QuizConfig> findByQuizCodes(@Param("quizCodes") Set<String> quizCodes);
 
 }

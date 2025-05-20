@@ -7,7 +7,4 @@ import java.util.List;
 
 public interface QuestionService {
     QuestionResponse createQuestion(CreateQuestionRequest request);
-    QuestionResponse getQuestionById(String id);
-    List<QuestionResponse> getQuestionsByIds(List<String> ids);
-    List<QuestionResponse> getAllQuestions();
 }

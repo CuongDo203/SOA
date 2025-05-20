@@ -124,11 +124,11 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('file', file);
         
         try {
-            const response = await fetch('/api/v1/quiz-creation/verify/questions', { 
+            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/verify/questions', { 
                 method: 'POST', 
                 body: formData 
             });
-            
+            console.log(response);
             // Kiểm tra content-type của response
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
@@ -222,15 +222,37 @@ document.addEventListener('DOMContentLoaded', function () {
             row.insertCell().textContent = q.answer_key || 'N/A';
         });
     }
-    document.getElementById('downloadSampleQuestions').removeEventListener('click', function () {
-        alert('Chức năng tải xuống tệp mẫu câu hỏi sẽ được triển khai sau.');
-    });
     nextToStep2Button.addEventListener('click', function () { 
         if (quizData.questions && quizData.questions.length > 0) { showStep(1); }
         else { alert('Vui lòng tải lên danh sách câu hỏi hợp lệ trước khi tiếp tục.'); }
     });
     nextToStep2Button.disabled = true;
 
+    // Thêm event listener cho nút "Chọn file khác" ở bước 1
+    const chooseAnotherQuestionFile = document.getElementById('chooseAnotherQuestionFile');
+    if (chooseAnotherQuestionFile) {
+        chooseAnotherQuestionFile.addEventListener('click', function() {
+            // Ẩn bảng xem trước câu hỏi
+            questionPreviewPanel.classList.add('hidden');
+            
+            // Hiển thị lại khu vực tải lên file
+            questionUploadArea.classList.remove('hidden');
+            
+            // Reset nội dung của bảng xem trước (tùy chọn)
+            questionPreviewBody.innerHTML = '';
+            
+            // Reset giá trị của input file để người dùng có thể chọn lại cùng một file nếu muốn
+            questionFileInput.value = '';
+            
+            // Vô hiệu hóa nút "Tiếp theo" cho đến khi file mới được tải lên
+            nextToStep2Button.disabled = true;
+                    
+            quizData.questions = null;
+            updateQuizInfoPanel();
+            
+            console.log("Đã chuyển về chế độ tải file câu hỏi mới");
+        });
+    }
 
     // --- STEP 2: Quiz Configuration ---
     backToStep1Button.addEventListener('click', function () {
@@ -285,12 +307,13 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             console.log(configData);
             // Call API to verify configuration
-            fetch('/api/v1/quiz-creation/verify/quiz-config', {
+            fetch('http://localhost:8888/api/v1/quiz-creation/verify/quiz-config', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(configData)
             })
                 .then(response => {
+                    console.log(response);
                     if (!response.ok) {
                         return response.json().then(errorData => {
                             throw errorData; // Pass the entire error object, not just the message
@@ -342,9 +365,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // --- STEP 3: Students Upload ---
-    // ... (Giữ nguyên logic Step 3 bạn đã có, bao gồm cả processStudentFiles và displayStudentPreview)
-    // Đảm bảo processStudentFiles gọi API backend /api/import/students/excel như đã thảo luận trước.
-    // Và displayStudentPreview hiển thị StudentDTO từ backend.
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => { studentUploadArea.addEventListener(eventName, preventDefaults, false); });
     ['dragenter', 'dragover'].forEach(eventName => { studentUploadArea.addEventListener(eventName, () => studentUploadArea.classList.add('highlight', 'bg-light'), false); });
     ['dragleave', 'drop'].forEach(eventName => { studentUploadArea.addEventListener(eventName, () => studentUploadArea.classList.remove('highlight', 'bg-light'), false); });
@@ -373,11 +393,11 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('file', file);
         
         try {
-            const response = await fetch('/api/v1/quiz-creation/verify/students', { 
+            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/verify/students', { 
                 method: 'POST', 
                 body: formData 
             });
-            
+            console.log(response);
             // Kiểm tra content-type của response
             const contentType = response.headers.get('content-type');
             if (!contentType || !contentType.includes('application/json')) {
@@ -486,9 +506,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     backToStep2ButtonFromStep3.addEventListener('click', function () { showStep(1); });
-    document.getElementById('downloadSampleStudents').removeEventListener('click', function () {
-        alert('Chức năng tải xuống tệp mẫu sinh viên sẽ được triển khai sau.');
-    });
     validateAndCreateQuizButton.addEventListener('click', function () {
         if (!quizData.questions || quizData.questions.length === 0) {
             alert('Thiếu dữ liệu câu hỏi. Vui lòng quay lại bước 1.');
@@ -526,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function () {
             questions: quizData.questions
         };
 
-        fetch('/api/v1/quiz-creation/create-quiz', {
+        fetch('http://localhost:8888/api/v1/quiz-creation/create-quiz', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(finalQuizData)
@@ -551,7 +568,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 // First navigate to the final step
                 showStep(3); // Chuyển sang Step 4: Result
 
-                // THEN update the progress indicator - do this AFTER showStep
                 const stepElement = document.getElementById('progress-step4');
                 stepElement.classList.add('completed');
                 stepElement.classList.remove('active');
@@ -568,6 +584,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     validateAndCreateQuizButton.disabled = true;
 
+    // Tương tự, thêm event listener cho nút "Chọn file khác" ở bước 3 (danh sách sinh viên)
+    const chooseAnotherStudentFile = document.getElementById('chooseAnotherStudentFile');
+    if (chooseAnotherStudentFile) {
+        chooseAnotherStudentFile.addEventListener('click', function() {
+            // Ẩn bảng xem trước sinh viên
+            studentPreviewPanel.classList.add('hidden');
+            
+            // Hiển thị lại khu vực tải lên file
+            studentUploadArea.classList.remove('hidden');
+            
+            // Reset nội dung của bảng xem trước (tùy chọn)
+            studentPreviewBody.innerHTML = '';
+            
+            // Reset giá trị của input file để người dùng có thể chọn lại cùng một file nếu muốn
+            studentFileInput.value = '';
+            
+            // Vô hiệu hóa nút "Xác thực và Tạo bài thi" cho đến khi file mới được tải lên
+            validateAndCreateQuizButton.disabled = true;
+            
+            // Cập nhật thông tin phản hồi
+            allDataValidationFeedback.querySelector('.alert').className = 'alert alert-info';
+            allDataValidationMessage.textContent = 'Vui lòng tải lên danh sách sinh viên.';
+            
+            // Cập nhật thông tin bên sidebar (nếu cần)
+            // Nếu bạn muốn giữ lại dữ liệu sinh viên đã tải, hãy comment dòng dưới đây
+            quizData.students = null;
+            updateQuizInfoPanel();
+            
+            console.log("Đã chuyển về chế độ tải file sinh viên mới");
+        });
+    }
 
     // --- STEP 4: Result ---
     copyQuizCodeButton.addEventListener('click', function () { 
