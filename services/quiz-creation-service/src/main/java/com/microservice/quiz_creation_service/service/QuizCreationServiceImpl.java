@@ -4,10 +4,7 @@ import com.microservice.event.dto.SendQuizCodeEvent;
 import com.microservice.quiz_creation_service.clients.*;
 import com.microservice.quiz_creation_service.dto.request.*;
 import com.microservice.quiz_creation_service.dto.response.*;
-import com.microservice.quiz_creation_service.entity.QuizCreationProcess;
 import com.microservice.quiz_creation_service.exception.ValidationException;
-import com.microservice.quiz_creation_service.repository.QuizCreationProcessRepository;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class QuizCreationServiceImpl implements QuizCreationService{
 
-    QuizCreationProcessRepository processRepository;
+//    QuizCreationProcessRepository processRepository;
     ImportServiceClient importServiceClient;
     StudentServiceClient studentServiceClient;
     QuizConfigServiceClient quizConfigServiceClient;
@@ -97,7 +94,7 @@ public class QuizCreationServiceImpl implements QuizCreationService{
             return response;
     }
 
-    @Transactional
+
     @Override
     public CreateQuizResponse createQuiz(CreateQuizRequest createQuizRequest) {
         // Validation checks

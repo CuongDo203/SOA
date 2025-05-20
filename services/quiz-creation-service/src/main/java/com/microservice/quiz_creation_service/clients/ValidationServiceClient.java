@@ -8,14 +8,14 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "validation-service", url = "http://localhost:8091/api/v1/validation")
+@FeignClient(name = "validation-service")
 public interface ValidationServiceClient {
-    @PostMapping("/questions")
+    @PostMapping("/api/v1/validation/questions")
     ValidationResult validateQuestions(@RequestBody QuestionListRequest request);
 
-    @PostMapping("/quiz-config")
+    @PostMapping("/api/v1/validation/quiz-config")
     ValidationResult validateQuizConfig(@RequestBody QuizConfigDTO request);
 
-    @PostMapping("/students")
+    @PostMapping("/api/v1/validation/students")
     ValidationResult validateStudents(@RequestBody StudentListRequest request);
 }

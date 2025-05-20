@@ -6,9 +6,9 @@ import com.microservice.quiz_creation_service.dto.response.QuestionResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(name = "question-service", url = "http://localhost:9004/api/v1/questions")
+@FeignClient(name = "question-service")
 public interface QuestionServiceClient {
 
-    @PostMapping
+    @PostMapping("/api/v1/questions")
     ApiResponse<QuestionResponse> createQuestion(CreateQuestionRequest request);
 }

@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "student-service", url = "http://localhost:9001/api/v1/students")
+@FeignClient(name = "student-service")
 public interface StudentServiceClient {
 
-    @PostMapping("/by-ids")
+    @PostMapping("/api/v1/students/by-ids")
     ApiResponse<List<StudentResponse>> getStudentsByIds(@RequestBody StudentIdsRequest request);
 
 }

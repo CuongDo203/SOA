@@ -8,6 +8,154 @@ services:
       - "8761:8761"
     networks:
       - microservice-networks
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
+  student-service:
+    build:
+      context: ./services/student-service
+      dockerfile: Dockerfile
+    ports:
+      - "9001:9001"
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/student_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=cuongngocdo203
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "9003:9003"
+    depends_on:
+      - eureka-server
+      - kafka
+    environment:
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=cdo85745@gmail.com
+      - SPRING_MAIL_PASSWORD=mrry ykzg dxnn hpow
+    networks:
+      - microservice-networks
+
+  question-service:
+    build:
+      context: ./services/question-service
+      dockerfile: Dockerfile
+    ports:
+      - "9004:9004"
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/question_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=cuongngocdo203
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
+  quiz-service:
+    build:
+      context: ./services/quiz-service
+      dockerfile: Dockerfile
+    ports:
+      - "9005:9005"
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/quiz_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=cuongngocdo203
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
+  quiz-creation-service:
+    build:
+      context: ./services/quiz-creation-service
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    depends_on:
+      - eureka-server
+      - kafka
+      - student-service
+      - question-service
+      - quiz-service
+      - quiz-config
+      - validation-service
+      - import-service
+    environment:
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+    networks:
+      - microservice-networks
+
+  quiz-config:
+    build:
+      context: ./services/quiz-config
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/quiz_config_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=cuongngocdo203
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
+  validation-service:
+    build:
+      context: ./services/validation-service
+      dockerfile: Dockerfile
+    ports:
+      - "8091:8091"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
+  import-service:
+    build:
+      context: ./services/import_service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICE-URL_DEFAULTZONE=http://eureka-server:8761/eureka
+    networks:
+      - microservice-networks
+
   kafka:
     image: 'bitnami/kafka:3.7.0'
     container_name: kafka
@@ -24,21 +172,25 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
     networks:
       - microservice-networks
+
   mysql:
     image: mysql:8.0
     container_name: mysql
     environment:
-      - MYSQL_ROOT_PASSWORD= cuongngocdo203
-      - MYSQL_DATABASE= student_db
+      MYSQL_ROOT_PASSWORD: cuongngocdo203
+      MYSQL_DATABASE: student_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
     ports:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql-init:/docker-entrypoint-initdb.d
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password
     networks:
       - microservice-networks
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pcuongngocdo203"]
       interval: 10s
       timeout: 5s
       retries: 5

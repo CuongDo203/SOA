@@ -11,11 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "student-service", url = "http://localhost:9001/api/v1/students")
+@FeignClient(name = "student-service")
 public interface StudentServiceClient {
-    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/api/v1/students", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<StudentResponse> createStudent(@RequestBody StudentCreationRequest request);
 
-    @PostMapping("/check-existence")
+    @PostMapping("/api/v1/students/check-existence")
     ApiResponse<StudentCheckResponse> checkStudentExistence(@Valid @RequestBody ListStudentCheckRequest request);
 }

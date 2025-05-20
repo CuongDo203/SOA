@@ -5,9 +5,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Dữ liệu thu thập từ tất cả các bước
     let quizData = {
-        questions: null, // Sẽ được điền từ API backend
+        questions: null, 
         config: null,
-        students: null // Sẽ được điền từ file Excel sinh viên (XLSX.js hoặc API backend)
+        students: null 
     };
 
     // Elements for Step 1
@@ -110,7 +110,6 @@ document.addEventListener('DOMContentLoaded', function () {
     function handleQuestionFileSelect(e) {  const files = e.target.files; processQuestionFiles(files); }
 
     async function processQuestionFiles(files) {
-        // ... (Logic gọi API backend cho question upload giữ nguyên như phiên bản trước) ...
         if (files.length === 0) { alert('Không có file nào được chọn.'); return; }
         const file = files[0];
         const allowedExtensions = /(\.xlsx|\.xls)$/i;
@@ -119,27 +118,38 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData();
         formData.append('file', file);
         try {
-            const response = await fetch('http://localhost:8888/api/v1/quiz-creation//verify/questions', { method: 'POST', body: formData });
+            const response = await fetch('http://localhost:8888/api/v1/quiz-creation/verify/questions', { method: 'POST', body: formData });
             if (!response.ok) {
-                let errorMsg = `Lỗi từ server: ${response.status} ${response.statusText}`;
-                try { const errorData = await response.json(); errorMsg = errorData.message || errorData.error || JSON.stringify(errorData); }
-                catch (e) { errorMsg = await response.text(); }
-                throw new Error(errorMsg);
+                const errorData = await response.json();
+                console.error('Lỗi từ server:', errorData);
+                
+                // Xử lý hiển thị lỗi chi tiết từ server
+                if (errorData.result && Array.isArray(errorData.result) && errorData.result.length > 0) {
+                    // Tạo danh sách lỗi từ mảng errors trong result
+                    const errorList = errorData.result.map(err => `• ${err}`).join('\n');
+                    const errorMessage = `${errorData.message || 'Lỗi khi xác thực câu hỏi'}:\n\n${errorList}`;
+                    alert(errorMessage);
+                } else {
+                    // Fallback nếu không có thông tin lỗi chi tiết
+                    alert(`Lỗi khi xác thực câu hỏi: ${errorData.message || 'Vui lòng kiểm tra lại file'}`);
+                }
+                
+                quizData.questions = null;
+                nextToStep2Button.disabled = true;
+                questionUploadArea.classList.remove('hidden');
+                questionPreviewPanel.classList.add('hidden');
+                return;
             }
+            
             const questions = await response.json();
             quizData.questions = questions.result || [];
+            
             if (questions.result && questions.result.length > 0) {
                 displayQuestionPreview(questions);
                 questionPreviewPanel.classList.remove('hidden');
                 questionUploadArea.classList.add('hidden');
                 nextToStep2Button.disabled = false;
-
-                // Update progress indicator for step 1
-                const stepElement = document.getElementById('progress-step1');
-                stepElement.classList.add('completed');
-                stepElement.classList.remove('active');
-                stepElement.querySelector('.progress-info').textContent = 'Hoàn thành';
-
+                
                 // Tự động điền số lượng câu hỏi vào ô cấu hình ở Step 2
                 if (questionCountInput) questionCountInput.value = questions.result.length;
             } else if (typeof questions === 'string') {

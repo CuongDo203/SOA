@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "quiz-service", url = "http://localhost:9005/api/v1/quiz")
+@FeignClient(name = "quiz-service")
 public interface QuizServiceClient {
 
-    @PostMapping
+    @PostMapping("/api/v1/quiz")
     public CreateQuizResponse createQuiz(@RequestBody QuizDTO quizDTO);
 
 }

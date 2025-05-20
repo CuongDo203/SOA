@@ -10,10 +10,6 @@ spring:
         locator:
           enabled: true
       routes:
-        - id: student-service
-          uri: lb://student-service
-          predicates:
-            - Path=/api/v1/students/**
         - id: quiz-creation-service
           uri: lb://quiz-creation-service
           predicates:

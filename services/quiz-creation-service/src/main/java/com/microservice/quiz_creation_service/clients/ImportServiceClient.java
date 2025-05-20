@@ -13,12 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @FeignClient(name = "import-service",
-        url = "http://localhost:8082/api/v1/import",
         configuration = FeignMultipartConfig.class)
 public interface ImportServiceClient {
-    @PostMapping(value = "/questions/excel", consumes = "multipart/form-data")
+    @PostMapping(value = "/api/v1/import/questions/excel", consumes = "multipart/form-data")
     List<QuestionParsedResponse> importQuestionsFromExcel(@RequestPart(value = "file") MultipartFile excelFile);
 
-    @PostMapping(value = "/students/excel", consumes = "multipart/form-data")
+    @PostMapping(value = "/api/v1/import/students/excel", consumes = "multipart/form-data")
     List<StudentParsedResponse> importStudentsFromExcel(@RequestPart(value = "file") MultipartFile excelFile);
 }
