@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class QuizCreationServiceImpl implements QuizCreationService{
 
-//    QuizCreationProcessRepository processRepository;
     ImportServiceClient importServiceClient;
     StudentServiceClient studentServiceClient;
     QuizConfigServiceClient quizConfigServiceClient;
